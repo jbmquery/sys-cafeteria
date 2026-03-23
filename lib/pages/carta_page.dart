@@ -14,7 +14,8 @@ class _CartaPageState extends State<CartaPage> {
   int currentTab = 1;
 
   String categoriaSeleccionada = "Bebidas";
-  String pedidoPara = "Mesa 4";
+
+  String mesaSeleccionada = "Mesa 4";
 
   final categorias = ["Bebidas", "Postres", "Toppings", "Promos"];
 
@@ -28,136 +29,7 @@ class _CartaPageState extends State<CartaPage> {
   ];
 
   List<Map<String, dynamic>> carrito = [];
-
-  double get subtotal {
-    double total = 0;
-    for (var item in carrito) {
-      total += item["precio"];
-    }
-    return total;
-  }
-
-  void agregarProducto(Map<String, dynamic> producto) {
-    setState(() {
-      carrito.add(producto);
-    });
-  }
-
-  void abrirCarrito() {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: "Carrito",
-      transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (_, __, ___) {
-        return Align(
-          alignment: Alignment.centerRight,
-          child: Material(
-            color: const Color(0xFF111827),
-            child: Container(
-              width: 320,
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
-
-                  const Text(
-                    "Pedido actual",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  Expanded(
-                    child: carrito.isEmpty
-                        ? const Center(
-                            child: Text(
-                              "Sin productos",
-                              style: TextStyle(color: Colors.white54),
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: carrito.length,
-                            itemBuilder: (context, index) {
-                              return ListTile(
-                                title: Text(
-                                  carrito[index]["nombre"],
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                                trailing: Text(
-                                  "S/ ${carrito[index]["precio"]}",
-                                  style: const TextStyle(color: Colors.white70),
-                                ),
-                              );
-                            },
-                          ),
-                  ),
-
-                  const Divider(color: Colors.white24),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Subtotal",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Text(
-                        "S/ ${subtotal.toStringAsFixed(2)}",
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              carrito.clear();
-                            });
-                            Navigator.pop(context);
-                          },
-                          child: const Text("Cancelar"),
-                        ),
-                      ),
-
-                      const SizedBox(width: 12),
-
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text("Guardar"),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-      transitionBuilder: (_, animation, __, child) {
-        return SlideTransition(
-          position: Tween(
-            begin: const Offset(1, 0),
-            end: Offset.zero,
-          ).animate(animation),
-          child: child,
-        );
-      },
-    );
-  }
+  final List<OverlayEntry> _toasts = [];
 
   @override
   Widget build(BuildContext context) {
@@ -178,13 +50,13 @@ class _CartaPageState extends State<CartaPage> {
             children: [
               const AppNavbar(),
 
-              const SizedBox(height: 10),
-
-              pedidoSection(),
-
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
 
               categorySection(),
+
+              const SizedBox(height: 14),
+
+              mesaSection(),
 
               const SizedBox(height: 14),
 
@@ -197,7 +69,10 @@ class _CartaPageState extends State<CartaPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: productos.length,
                   itemBuilder: (context, index) {
-                    return productCard(productos[index]);
+                    return productCard(
+                      productos[index]["nombre"] as String,
+                      productos[index]["precio"] as double,
+                    );
                   },
                 ),
               ),
@@ -213,6 +88,35 @@ class _CartaPageState extends State<CartaPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget mesaSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              "Pedido para: $mesaSeleccionada",
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(Icons.swap_horiz, color: Colors.white),
+          ),
+        ],
       ),
     );
   }
@@ -263,33 +167,6 @@ class _CartaPageState extends State<CartaPage> {
     );
   }
 
-  Widget pedidoSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              "Pedido para: $pedidoPara",
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
-          IconButton(
-            onPressed: abrirCarrito,
-            icon: Stack(
-              children: [const Icon(Icons.cached, color: Colors.white)],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget searchSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -314,39 +191,44 @@ class _CartaPageState extends State<CartaPage> {
 
           const SizedBox(width: 10),
 
-          IconButton(
-            onPressed: abrirCarrito,
-            icon: Stack(
-              children: [
-                const Icon(Icons.shopping_cart, color: Colors.white),
+          Stack(
+            children: [
+              GestureDetector(
+                onTap: abrirCarrito,
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.shopping_cart, color: Colors.white),
+                ),
+              ),
 
-                if (carrito.isNotEmpty)
-                  Positioned(
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        carrito.length.toString(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                        ),
-                      ),
+              if (carrito.isNotEmpty)
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      carrito.length.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget productCard(Map<String, dynamic> producto) {
+  Widget productCard(String nombre, double precio) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
@@ -361,7 +243,7 @@ class _CartaPageState extends State<CartaPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                producto["nombre"],
+                nombre,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -370,27 +252,304 @@ class _CartaPageState extends State<CartaPage> {
               ),
               const SizedBox(height: 6),
               Text(
-                "S/ ${producto["precio"]}",
+                "S/ ${precio.toStringAsFixed(2)}",
                 style: const TextStyle(color: Colors.white70),
               ),
             ],
           ),
 
           GestureDetector(
-            onTap: () => agregarProducto(producto),
+            onTap: () {
+              setState(() {
+                carrito.add({"nombre": nombre, "precio": precio});
+              });
+
+              mostrarToast("$nombre agregado");
+            },
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF00C8AA), Color(0xFF00A896)],
                 ),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.add, color: Colors.black),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  void mostrarToast(String mensaje) {
+    final overlay = Overlay.of(context);
+
+    final topOffset = 60.0 + (_toasts.length * 60);
+
+    late OverlayEntry entry;
+
+    entry = OverlayEntry(
+      builder: (_) => Positioned(
+        top: topOffset,
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF00C8AA), Color(0xFF00A896)],
+              ),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Text(
+              mensaje,
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    _toasts.add(entry);
+    overlay.insert(entry);
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      entry.remove();
+      _toasts.remove(entry);
+    });
+  }
+
+  void abrirCarrito() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "",
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 300),
+
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            double subtotal = carrito.fold(
+              0.0,
+              (double sum, item) => sum + (item["precio"] as double),
+            );
+
+            return Align(
+              alignment: Alignment.centerRight,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.82,
+                  height: double.infinity,
+                  padding: const EdgeInsets.all(18),
+
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF111827),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      bottomLeft: Radius.circular(24),
+                    ),
+                  ),
+
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 40),
+
+                      const Text(
+                        "Carrito",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      Expanded(
+                        child: carrito.isEmpty
+                            ? const Center(
+                                child: Text(
+                                  "Sin productos",
+                                  style: TextStyle(color: Colors.white54),
+                                ),
+                              )
+                            : ListView.builder(
+                                itemCount: carrito.length,
+                                itemBuilder: (context, index) {
+                                  final item = carrito[index];
+
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.all(14),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.05),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                item["nombre"] as String,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+
+                                              const SizedBox(height: 4),
+
+                                              Text(
+                                                "S/ ${(item["precio"] as double).toStringAsFixed(2)}",
+                                                style: const TextStyle(
+                                                  color: Colors.white70,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              carrito.removeAt(index);
+                                            });
+
+                                            setDialogState(() {});
+                                          },
+                                          child: const Icon(
+                                            Icons.delete_outline,
+                                            color: Colors.redAccent,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Subtotal",
+                              style: TextStyle(color: Colors.white70),
+                            ),
+
+                            Text(
+                              "S/ ${subtotal.toStringAsFixed(2)}",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF374151),
+                                    Color(0xFF1F2937),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    carrito.clear();
+                                  });
+
+                                  setDialogState(() {});
+                                },
+                                child: const Text("Cancelar"),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF00C8AA),
+                                    Color(0xFF00A896),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text(
+                                  "Guardar",
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1, 0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: child,
+        );
+      },
     );
   }
 }
