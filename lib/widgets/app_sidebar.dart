@@ -78,6 +78,7 @@ class AppSidebar extends StatelessWidget {
             menuItem(Icons.notifications_none, "Notificaciones"),
             menuItem(Icons.attach_money_outlined, "Bonos y Descuentos"),
             menuItem(Icons.assignment_turned_in_outlined, "Faltas y Tardanzas"),
+            menuItem(Icons.settings_applications_outlined, "Configuraciones"),
 
             const SizedBox(height: 14),
 
