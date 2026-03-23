@@ -65,6 +65,7 @@ class AppSidebar extends StatelessWidget {
             menuItem(Icons.table_restaurant, "Mesas"),
             menuItem(Icons.menu_book, "Carta"),
             menuItem(Icons.inventory_2_outlined, "Inventario"),
+            menuItem(Icons.shopping_bag_outlined, "Compras"),
             menuItem(Icons.local_shipping_outlined, "Proveedores"),
             menuItem(Icons.people_outline, "Clientes"),
 
@@ -77,7 +78,7 @@ class AppSidebar extends StatelessWidget {
             menuItem(Icons.bar_chart_outlined, "Dashboard"),
             menuItem(Icons.notifications_none, "Notificaciones"),
             menuItem(Icons.attach_money_outlined, "Bonos y Descuentos"),
-            menuItem(Icons.assignment_turned_in_outlined, "Faltas y Tardanzas"),
+            menuItem(Icons.assignment_turned_in_outlined, "Asistencias"),
             menuItem(Icons.settings_applications_outlined, "Configuraciones"),
 
             const SizedBox(height: 14),

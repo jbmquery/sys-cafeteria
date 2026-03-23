@@ -42,7 +42,7 @@ class TableCard extends StatelessWidget {
             nombre,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Colors.white,
+              color: Color.fromARGB(255, 0, 0, 0),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -51,14 +51,20 @@ class TableCard extends StatelessWidget {
 
           Text(
             subtitulo,
-            style: const TextStyle(color: Colors.white70, fontSize: 11),
+            style: const TextStyle(
+              color: Color.fromARGB(179, 41, 41, 41),
+              fontSize: 11,
+            ),
           ),
 
           const SizedBox(height: 8),
 
           Text(
             disponible ? "Disponible" : "Ocupado",
-            style: const TextStyle(color: Colors.white, fontSize: 10),
+            style: const TextStyle(
+              color: Color.fromARGB(255, 0, 0, 0),
+              fontSize: 10,
+            ),
           ),
         ],
       ),

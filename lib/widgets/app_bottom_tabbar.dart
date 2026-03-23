@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../pages/home_page.dart';
+import '../pages/carta_page.dart';
+import '../pages/caja_page.dart';
 
 class AppBottomTabBar extends StatelessWidget {
   final int currentIndex;
@@ -33,7 +36,27 @@ class AppBottomTabBar extends StatelessWidget {
           final selected = currentIndex == index;
 
           return GestureDetector(
-            onTap: () => onTap(index),
+            onTap: () {
+              onTap(index);
+
+              if (index == currentIndex) return;
+
+              Widget destino;
+
+              if (index == 0) {
+                destino = const HomePage();
+              } else if (index == 1) {
+                destino = const CartaPage();
+              } else {
+                destino = const CajaPage();
+              }
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => destino),
+              );
+            },
+
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
