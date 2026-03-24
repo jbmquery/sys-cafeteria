@@ -1,5 +1,7 @@
-//lib/widgets/usuarios/usuarios_tab.dart
+//lib/widgtes/usuarios/nusuarios_tab.dart
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../services/user_service.dart';
 import 'nuevo_usuario_dialog.dart';
 
 class UsuariosTab extends StatelessWidget {
@@ -7,11 +9,12 @@ class UsuariosTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userService = UserService();
+
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-
           child: Row(
             children: [
               const Expanded(
@@ -24,34 +27,14 @@ class UsuariosTab extends StatelessWidget {
                   ),
                 ),
               ),
-
-              Container(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color.fromARGB(255, 132, 95, 221),
-                      Color.fromARGB(255, 111, 114, 255),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                  ),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (_) => const NuevoUsuarioDialog(),
-                    );
-                  },
-                  child: const Text(
-                    "Nuevo Usuario",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
+              ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => const NuevoUsuarioDialog(),
+                  );
+                },
+                child: const Text("Nuevo Usuario"),
               ),
             ],
           ),
@@ -60,53 +43,31 @@ class UsuariosTab extends StatelessWidget {
         const SizedBox(height: 14),
 
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: 10,
-            itemBuilder: (context, index) {
-              return Container(
-                margin: const EdgeInsets.only(bottom: 14),
-                padding: const EdgeInsets.all(16),
+          child: StreamBuilder<QuerySnapshot>(
+            stream: userService.obtenerUsuarios(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(18),
-                ),
+              final usuarios = snapshot.data!.docs;
 
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.white.withOpacity(0.08),
-                      child: const Icon(Icons.person, color: Colors.white70),
+              return ListView.builder(
+                itemCount: usuarios.length,
+                itemBuilder: (context, index) {
+                  final user = usuarios[index];
+
+                  return ListTile(
+                    title: Text(
+                      user['nombres'],
+                      style: const TextStyle(color: Colors.white),
                     ),
-
-                    const SizedBox(width: 14),
-
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Usuario ${index + 1}",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                          const SizedBox(height: 4),
-
-                          const Text(
-                            "Mozo",
-                            style: TextStyle(color: Colors.white54),
-                          ),
-                        ],
-                      ),
+                    subtitle: Text(
+                      user['tipo_usuario'],
+                      style: const TextStyle(color: Colors.white54),
                     ),
-
-                    const Icon(Icons.chevron_right, color: Colors.white38),
-                  ],
-                ),
+                  );
+                },
               );
             },
           ),

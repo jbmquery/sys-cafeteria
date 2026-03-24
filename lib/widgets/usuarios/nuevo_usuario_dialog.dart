@@ -1,50 +1,83 @@
+//lib/widgtes/usuarios/nuevo_usuario_dialog.dart
 import 'package:flutter/material.dart';
+import '../../services/user_service.dart';
 import '../custom_textfield.dart';
+import '../../services/auth_service.dart';
+import '../../pages/login_page.dart';
 
-class NuevoUsuarioDialog extends StatelessWidget {
+class NuevoUsuarioDialog extends StatefulWidget {
   const NuevoUsuarioDialog({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final nombresController = TextEditingController();
-    final correoController = TextEditingController();
-    final passwordController = TextEditingController();
+  State<NuevoUsuarioDialog> createState() => _NuevoUsuarioDialogState();
+}
 
+class _NuevoUsuarioDialogState extends State<NuevoUsuarioDialog> {
+  final nombresController = TextEditingController();
+  final correoController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  final UserService userService = UserService();
+  final AuthService authService = AuthService();
+
+  bool cargando = false;
+
+  Future<void> guardarUsuario() async {
+    setState(() {
+      cargando = true;
+    });
+
+    String? uid = await userService.crearUsuario(
+      nombres: nombresController.text.trim(),
+      correo: correoController.text.trim(),
+      password: passwordController.text.trim(),
+    );
+
+    setState(() {
+      cargando = false;
+    });
+
+    if (uid == "correo_existente") {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Ese correo ya está registrado")),
+      );
+      return;
+    }
+
+    if (uid != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Usuario creado correctamente")),
+      );
+
+      await Future.delayed(const Duration(milliseconds: 700));
+
+      await authService.logout();
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+        (route) => false,
+      );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Error al crear usuario")));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-
       child: Container(
         padding: const EdgeInsets.all(24),
-
         decoration: BoxDecoration(
           color: const Color(0xFF111827),
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
         ),
-
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 18),
-
-            const Text(
-              "Nuevo Usuario",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            const Text(
-              "Registro inicial del colaborador",
-              style: TextStyle(color: Colors.white54, fontSize: 13),
-            ),
-
-            const SizedBox(height: 24),
-
             CustomTextField(
               controller: nombresController,
               hint: "Nombres",
@@ -73,57 +106,11 @@ class NuevoUsuarioDialog extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        "Cancelar",
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(width: 12),
-
-                Expanded(
-                  child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color.fromARGB(255, 132, 95, 221),
-                          Color.fromARGB(255, 111, 114, 255),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                      ),
-                      onPressed: () {},
-                      child: const Text(
-                        "Guardar",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            ElevatedButton(
+              onPressed: cargando ? null : guardarUsuario,
+              child: cargando
+                  ? const CircularProgressIndicator()
+                  : const Text("Guardar"),
             ),
           ],
         ),

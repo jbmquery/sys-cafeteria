@@ -1,5 +1,7 @@
 //lib/widgets/app_navbar.dart
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
+import '../pages/login_page.dart';
 
 class AppNavbar extends StatelessWidget {
   const AppNavbar({super.key});
@@ -7,6 +9,7 @@ class AppNavbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String usuario = "Santiago";
+    final AuthService authService = AuthService();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
@@ -57,9 +60,15 @@ class AppNavbar extends StatelessWidget {
               menuItem(Icons.logout, "Cerrar Sesión"),
             ],
 
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == "Cerrar Sesión") {
-                Navigator.popUntil(context, (route) => route.isFirst);
+                await authService.logout();
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginPage()),
+                  (route) => false,
+                );
               }
             },
 

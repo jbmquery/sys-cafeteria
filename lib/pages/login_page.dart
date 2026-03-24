@@ -17,14 +17,14 @@ class _LoginPageState extends State<LoginPage> {
 
   final AuthService authService = AuthService();
 
-  void login() {
-    bool acceso = authService.login(
-      usuarioController.text,
-      passwordController.text,
+  Future<void> login() async {
+    final userData = await authService.login(
+      usuarioController.text.trim(),
+      passwordController.text.trim(),
     );
 
-    if (acceso) {
-      Navigator.push(
+    if (userData != null) {
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const HomePage()),
       );
