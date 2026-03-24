@@ -1,3 +1,4 @@
+//lib/widgets/custom_textfield.dart
 import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -5,6 +6,7 @@ class CustomTextField extends StatelessWidget {
   final String hint;
   final IconData icon;
   final bool obscure;
+  final Color borderColor;
 
   const CustomTextField({
     super.key,
@@ -12,19 +14,24 @@ class CustomTextField extends StatelessWidget {
     required this.hint,
     required this.icon,
     this.obscure = false,
+    this.borderColor = const Color.fromARGB(255, 0, 200, 170),
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
+
       child: TextField(
         controller: controller,
         obscureText: obscure,
+
         style: const TextStyle(color: Colors.white),
+
         decoration: InputDecoration(
           labelText: hint,
           labelStyle: const TextStyle(color: Colors.white70),
+
           prefixIcon: Icon(icon, color: Colors.white70),
 
           enabledBorder: OutlineInputBorder(
@@ -34,10 +41,7 @@ class CustomTextField extends StatelessWidget {
 
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(18),
-            borderSide: const BorderSide(
-              color: Color.fromARGB(255, 0, 200, 170),
-              width: 2,
-            ),
+            borderSide: BorderSide(color: borderColor, width: 2),
           ),
 
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),

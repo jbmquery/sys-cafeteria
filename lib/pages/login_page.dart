@@ -104,6 +104,7 @@ class _LoginPageState extends State<LoginPage> {
                         controller: usuarioController,
                         hint: "Usuario",
                         icon: Icons.person_outline,
+                        borderColor: const Color.fromARGB(255, 0, 200, 170),
                       ),
 
                       const SizedBox(height: 20),
@@ -113,6 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                         hint: "Contraseña",
                         icon: Icons.lock_outline,
                         obscure: true,
+                        borderColor: const Color.fromARGB(255, 0, 200, 170),
                       ),
 
                       const SizedBox(height: 34),

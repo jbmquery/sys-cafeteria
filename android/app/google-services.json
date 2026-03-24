@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "150582503310",
+    "project_id": "pluvia-cafe",
+    "storage_bucket": "pluvia-cafe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:150582503310:android:566b8a98a488a5dc38a6df",
+        "android_client_info": {
+          "package_name": "com.example.sys_cafeteria"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "150582503310-7olpvpla8i9l1cd74159ere0lellbjes.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4WJg8PgXeh8j5Jcq26o5dlP_0e0ugGcw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "150582503310-7olpvpla8i9l1cd74159ere0lellbjes.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

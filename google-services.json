@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "142922411395",
+    "project_id": "db-sys-cafeteria",
+    "storage_bucket": "db-sys-cafeteria.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:142922411395:android:1c87399d5b7faa52d2dab6",
+        "android_client_info": {
+          "package_name": "app.sys_cafeteria"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDdivfqZb4uB00Cu0YdP7WY28Yzep56vI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

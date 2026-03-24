@@ -1,4 +1,6 @@
+//lib/widgets/app_siderbar.dart
 import 'package:flutter/material.dart';
+import '../pages/usuarios_page.dart';
 
 class AppSidebar extends StatelessWidget {
   const AppSidebar({super.key});
@@ -85,7 +87,16 @@ class AppSidebar extends StatelessWidget {
 
             sectionTitle("Dueña"),
 
-            menuItem(Icons.person_outline, "Usuarios"),
+            menuItem(
+              Icons.person_outline,
+              "Usuarios",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const UsuariosPage()),
+                );
+              },
+            ),
             menuItem(Icons.analytics_outlined, "Marketing"),
             menuItem(Icons.bar_chart_outlined, "Dashboard Maestro"),
           ],
@@ -109,7 +120,7 @@ class AppSidebar extends StatelessWidget {
     );
   }
 
-  Widget menuItem(IconData icon, String titulo) {
+  Widget menuItem(IconData icon, String titulo, {VoidCallback? onTap}) {
     return ListTile(
       leading: Icon(icon, color: Colors.white70),
 
@@ -120,7 +131,7 @@ class AppSidebar extends StatelessWidget {
 
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
 
-      onTap: () {},
+      onTap: onTap,
     );
   }
 }
