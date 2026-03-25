@@ -170,6 +170,16 @@ class _EditarUsuarioDialogState extends State<EditarUsuarioDialog> {
               const SizedBox(height: 24),
 
               CustomTextField(
+                controller: correoController,
+                hint: "Correo",
+                icon: Icons.mail_outline,
+                enabled: false,
+                borderColor: const Color.fromARGB(255, 111, 114, 255),
+              ),
+
+              const SizedBox(height: 12),
+
+              CustomTextField(
                 controller: nombresController,
                 hint: "Nombres",
                 icon: Icons.person_outline,
@@ -194,16 +204,6 @@ class _EditarUsuarioDialogState extends State<EditarUsuarioDialog> {
                 hint: "Apellido materno",
                 icon: Icons.person_outline,
                 enabled: !protegido,
-                borderColor: const Color.fromARGB(255, 111, 114, 255),
-              ),
-
-              const SizedBox(height: 12),
-
-              CustomTextField(
-                controller: correoController,
-                hint: "Correo",
-                icon: Icons.mail_outline,
-                enabled: false,
                 borderColor: const Color.fromARGB(255, 111, 114, 255),
               ),
 
@@ -292,7 +292,7 @@ class _EditarUsuarioDialogState extends State<EditarUsuarioDialog> {
 
               SwitchListTile(
                 value: estado,
-                activeColor: Colors.greenAccent,
+                activeColor: const Color.fromARGB(255, 111, 114, 255),
                 onChanged: protegido
                     ? null
                     : (v) {
