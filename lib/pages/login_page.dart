@@ -102,8 +102,8 @@ class _LoginPageState extends State<LoginPage> {
 
                       CustomTextField(
                         controller: usuarioController,
-                        hint: "Usuario",
-                        icon: Icons.person_outline,
+                        hint: "Correo",
+                        icon: Icons.mail_outline,
                         borderColor: const Color.fromARGB(255, 0, 200, 170),
                       ),
 

@@ -1,3 +1,4 @@
+//lib/services/user_service.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -9,7 +10,7 @@ class UserService {
     required String nombres,
     required String correo,
     required String password,
-    String tipoUsuario = "mozo",
+    required String tipoUsuario,
   }) async {
     try {
       UserCredential cred = await _auth.createUserWithEmailAndPassword(
