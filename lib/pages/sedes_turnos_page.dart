@@ -1,0 +1,86 @@
+import 'package:flutter/material.dart';
+import '../widgets/app_sidebar.dart';
+import '../widgets/app_navbar.dart';
+import '../widgets/app_bottom_tabbar.dart';
+import '../widgets/sedes_turnos/sedes_tab.dart';
+import '../widgets/sedes_turnos/turnos_tab.dart';
+
+class SedesTurnosPage extends StatefulWidget {
+  const SedesTurnosPage({super.key});
+
+  @override
+  State<SedesTurnosPage> createState() => _SedesTurnosPageState();
+}
+
+class _SedesTurnosPageState extends State<SedesTurnosPage> {
+  int currentTab = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        drawer: const AppSidebar(),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF0B0F1A), Color(0xFF111827), Color(0xFF1E293B)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                const AppNavbar(),
+                const SizedBox(height: 10),
+
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: const TabBar(
+                    indicator: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color.fromARGB(255, 132, 95, 221),
+                          Color.fromARGB(255, 111, 114, 255),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(18)),
+                    ),
+                    labelColor: Colors.black,
+                    unselectedLabelColor: Colors.white70,
+                    dividerColor: Colors.transparent,
+                    tabs: [
+                      Tab(text: "Sedes"),
+                      Tab(text: "Turnos"),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                const Expanded(
+                  child: TabBarView(children: [SedesTab(), TurnosTab()]),
+                ),
+
+                AppBottomTabBar(
+                  currentIndex: currentTab,
+                  onTap: (index) {
+                    setState(() {
+                      currentTab = index;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

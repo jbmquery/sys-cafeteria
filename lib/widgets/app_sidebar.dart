@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../pages/usuarios_page.dart';
+import '../pages/sedes_turnos_page.dart';
 import '../services/navigation_service.dart';
 
 class AppSidebar extends StatelessWidget {
@@ -69,6 +70,7 @@ class AppSidebar extends StatelessWidget {
             visible("Notificaciones") ||
             visible("Bonos y Descuentos") ||
             visible("Asistencias") ||
+            visible("Sedes y Turnos") ||
             visible("Configuraciones");
 
         final fundadoraVisible =
@@ -162,11 +164,19 @@ class AppSidebar extends StatelessWidget {
                   menuItem(Icons.attach_money_outlined, "Bonos y Descuentos"),
                 if (visible("Asistencias"))
                   menuItem(Icons.assignment_turned_in_outlined, "Asistencias"),
-                if (visible("Configuraciones"))
+                if (visible("Sedes y Turnos"))
                   menuItem(
-                    Icons.settings_applications_outlined,
-                    "Configuraciones",
+                    Icons.query_builder,
+                    "Sedes y Turnos",
+                    onTap: () {
+                      NavigationService.slideTo(
+                        context,
+                        const SedesTurnosPage(),
+                      );
+                    },
                   ),
+                if (visible("Configuraciones"))
+                  menuItem(Icons.build, "Configuraciones"),
 
                 if (fundadoraVisible) const SizedBox(height: 14),
                 if (fundadoraVisible) sectionTitle("fundadora"),

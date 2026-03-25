@@ -30,6 +30,7 @@ class _PermisosTabState extends State<PermisosTab> {
     "Notificaciones",
     "Bonos y Descuentos",
     "Asistencias",
+    "Sedes y Turnos",
     "Configuraciones",
     "Usuarios",
     "Marketing",

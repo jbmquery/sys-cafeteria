@@ -8,6 +8,7 @@ class CustomTextField extends StatelessWidget {
   final bool obscure;
   final Color borderColor;
   final bool enabled;
+  final TextInputType keyboardType;
 
   const CustomTextField({
     super.key,
@@ -17,6 +18,7 @@ class CustomTextField extends StatelessWidget {
     this.obscure = false,
     this.borderColor = const Color.fromARGB(255, 0, 200, 170),
     this.enabled = true,
+    this.keyboardType = TextInputType.text,
   });
 
   @override
@@ -28,6 +30,7 @@ class CustomTextField extends StatelessWidget {
         controller: controller,
         obscureText: obscure,
         enabled: enabled,
+        keyboardType: keyboardType,
 
         style: const TextStyle(color: Colors.white),
 
