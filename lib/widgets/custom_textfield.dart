@@ -7,6 +7,7 @@ class CustomTextField extends StatelessWidget {
   final IconData icon;
   final bool obscure;
   final Color borderColor;
+  final bool enabled;
 
   const CustomTextField({
     super.key,
@@ -15,6 +16,7 @@ class CustomTextField extends StatelessWidget {
     required this.icon,
     this.obscure = false,
     this.borderColor = const Color.fromARGB(255, 0, 200, 170),
+    this.enabled = true,
   });
 
   @override
@@ -25,6 +27,7 @@ class CustomTextField extends StatelessWidget {
       child: TextField(
         controller: controller,
         obscureText: obscure,
+        enabled: enabled,
 
         style: const TextStyle(color: Colors.white),
 

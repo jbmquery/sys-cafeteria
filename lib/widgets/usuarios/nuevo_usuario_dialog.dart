@@ -218,10 +218,7 @@ class _NuevoUsuarioDialogState extends State<NuevoUsuarioDialog> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text(
-                            "Guardar",
-                            style: TextStyle(color: Colors.black),
-                          ),
+                        : const Text("Guardar"),
                   ),
                 ),
               ],

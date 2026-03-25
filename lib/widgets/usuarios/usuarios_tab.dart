@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/user_service.dart';
 import 'nuevo_usuario_dialog.dart';
+import 'editar_usuario_dialog.dart';
 
 class UsuariosTab extends StatefulWidget {
   const UsuariosTab({super.key});
@@ -226,7 +227,13 @@ class _UsuariosTabState extends State<UsuariosTab> {
                           ),
 
                           IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) =>
+                                    EditarUsuarioDialog(usuario: usuario),
+                              );
+                            },
                             icon: const Icon(
                               Icons.more_vert,
                               color: Colors.white54,
