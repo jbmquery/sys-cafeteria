@@ -31,7 +31,6 @@ class AppBottomTabBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.white.withOpacity(0.06)),
       ),
-
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(items.length, (index) {
@@ -40,6 +39,8 @@ class AppBottomTabBar extends StatelessWidget {
           return GestureDetector(
             onTap: () {
               if (index == currentIndex) return;
+
+              onTap(index);
 
               Widget destino;
 
@@ -53,7 +54,6 @@ class AppBottomTabBar extends StatelessWidget {
 
               NavigationService.slideReplace(context, destino);
             },
-
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
@@ -65,7 +65,6 @@ class AppBottomTabBar extends StatelessWidget {
                     : null,
                 borderRadius: BorderRadius.circular(18),
               ),
-
               child: Row(
                 children: [
                   Icon(
@@ -73,9 +72,7 @@ class AppBottomTabBar extends StatelessWidget {
                     color: selected ? Colors.black : Colors.white70,
                     size: 20,
                   ),
-
                   const SizedBox(width: 8),
-
                   Text(
                     items[index]["label"] as String,
                     style: TextStyle(
