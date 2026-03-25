@@ -1,3 +1,4 @@
+//lib/pages/caja_page.dart
 import 'package:flutter/material.dart';
 import '../widgets/app_sidebar.dart';
 import '../widgets/app_navbar.dart';
