@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../pages/usuarios_page.dart';
+import '../services/navigation_service.dart';
 
 class AppSidebar extends StatelessWidget {
   const AppSidebar({super.key});
@@ -175,22 +176,7 @@ class AppSidebar extends StatelessWidget {
                     Icons.person_outline,
                     "Usuarios",
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder: (_, __, ___) => const UsuariosPage(),
-                          transitionsBuilder: (_, animation, __, child) {
-                            return SlideTransition(
-                              position: Tween(
-                                begin: const Offset(1, 0),
-                                end: Offset.zero,
-                              ).animate(animation),
-                              child: child,
-                            );
-                          },
-                          transitionDuration: const Duration(milliseconds: 280),
-                        ),
-                      );
+                      NavigationService.slideTo(context, const UsuariosPage());
                     },
                   ),
 

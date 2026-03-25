@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../pages/home_page.dart';
 import '../pages/carta_page.dart';
 import '../pages/caja_page.dart';
+import '../services/navigation_service.dart';
 
 class AppBottomTabBar extends StatelessWidget {
   final int currentIndex;
@@ -38,8 +39,6 @@ class AppBottomTabBar extends StatelessWidget {
 
           return GestureDetector(
             onTap: () {
-              onTap(index);
-
               if (index == currentIndex) return;
 
               Widget destino;
@@ -52,10 +51,7 @@ class AppBottomTabBar extends StatelessWidget {
                 destino = const CajaPage();
               }
 
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => destino),
-              );
+              NavigationService.slideReplace(context, destino);
             },
 
             child: AnimatedContainer(

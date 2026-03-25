@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../widgets/custom_textfield.dart';
 import '../services/auth_service.dart';
 import 'home_page.dart';
+import '../services/navigation_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -24,10 +25,7 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     if (userData != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
-      );
+      NavigationService.slideReplace(context, const HomePage());
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Usuario o contraseña incorrectos")),
