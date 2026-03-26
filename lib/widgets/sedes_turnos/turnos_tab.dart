@@ -15,41 +15,22 @@ class _TurnosTabState extends State<TurnosTab> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         children: [
           Row(
             children: [
               Expanded(
                 flex: 2,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color.fromARGB(255, 132, 95, 221),
-                        Color.fromARGB(255, 111, 114, 255),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => const NuevoEditarTurnosDialog(),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                    ),
-                    child: const Text(
-                      "Nuevo Turno",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                  ),
-                ),
+                child: gradientButton("Nuevo Turno", () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => const NuevoEditarTurnosDialog(),
+                  );
+                }),
               ),
+              const SizedBox(width: 12),
+              Expanded(child: filtroDropdown()),
             ],
           ),
 
@@ -67,30 +48,31 @@ class _TurnosTabState extends State<TurnosTab> {
                   );
                 }
 
-                final docs = snapshot.data!.docs;
+                List docs = snapshot.data!.docs;
+
+                docs = docs.where((doc) {
+                  final estado = doc['estado'];
+
+                  if (filtroEstado == "activos") return estado == true;
+                  if (filtroEstado == "inactivos") return estado == false;
+
+                  return true;
+                }).toList();
 
                 return ListView.builder(
                   itemCount: docs.length,
                   itemBuilder: (_, index) {
                     final turno = docs[index];
 
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: ListTile(
-                        title: Text(
-                          turno['nombre_turno'],
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        subtitle: Text(
-                          turno['nombre_sede'],
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                      ),
+                    return card(
+                      turno['nombre_turno'],
+                      turno['nombre_sede'],
+                      () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => NuevoEditarTurnosDialog(turno: turno),
+                        );
+                      },
                     );
                   },
                 );
@@ -98,6 +80,78 @@ class _TurnosTabState extends State<TurnosTab> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget gradientButton(String text, VoidCallback onTap) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color.fromARGB(255, 132, 95, 221),
+            Color.fromARGB(255, 111, 114, 255),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+        ),
+        child: Text(text, style: const TextStyle(color: Colors.black)),
+      ),
+    );
+  }
+
+  Widget filtroDropdown() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: filtroEstado,
+          dropdownColor: const Color(0xFF111827),
+          style: const TextStyle(color: Colors.white),
+          isExpanded: true,
+          items: const [
+            DropdownMenuItem(value: "todos", child: Text("Todos")),
+            DropdownMenuItem(value: "activos", child: Text("Activo")),
+            DropdownMenuItem(value: "inactivos", child: Text("Desactivo")),
+          ],
+          onChanged: (v) {
+            setState(() {
+              filtroEstado = v!;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget card(String nombre, String sede, VoidCallback onTap) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: ListTile(
+        title: Text(nombre, style: const TextStyle(color: Colors.white)),
+        subtitle: Text(
+          "• Sede: $sede",
+          style: const TextStyle(color: Colors.white70),
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.more_vert, color: Colors.white54),
+          onPressed: onTap,
+        ),
       ),
     );
   }

@@ -290,6 +290,13 @@ class _NuevoEditarTurnosDialogState extends State<NuevoEditarTurnosDialog> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.white24),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
                   child: const Text(
                     "Cerrar",
                     style: TextStyle(color: Colors.white70),

@@ -66,7 +66,7 @@ class _SedesTabState extends State<SedesTab> {
 
                     return card(
                       sede['nombre_sede'],
-                      sede['direccion'],
+                      sede['capacidad'].toString(),
                       sede['tipo_sede'],
                       () {
                         showDialog(
@@ -137,7 +137,7 @@ class _SedesTabState extends State<SedesTab> {
 
   Widget card(
     String nombre,
-    String direccion,
+    String capacidad,
     String tipo,
     VoidCallback onTap,
   ) {
@@ -151,7 +151,7 @@ class _SedesTabState extends State<SedesTab> {
       child: ListTile(
         title: Text(nombre, style: const TextStyle(color: Colors.white)),
         subtitle: Text(
-          "$direccion • $tipo",
+          "• Capacidad: $capacidad • Tipo: $tipo",
           style: const TextStyle(color: Colors.white70),
         ),
         trailing: IconButton(

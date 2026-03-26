@@ -42,7 +42,9 @@ class _SedesTurnosPageState extends State<SedesTurnosPage> {
                     color: Colors.white.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(18),
                   ),
+
                   child: const TabBar(
+                    indicatorSize: TabBarIndicatorSize.tab,
                     indicator: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -52,6 +54,7 @@ class _SedesTurnosPageState extends State<SedesTurnosPage> {
                       ),
                       borderRadius: BorderRadius.all(Radius.circular(18)),
                     ),
+
                     labelColor: Colors.black,
                     unselectedLabelColor: Colors.white70,
                     dividerColor: Colors.transparent,
