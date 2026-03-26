@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../pages/usuarios_page.dart';
 import '../pages/sedes_turnos_page.dart';
+import '../pages/edit_mesas_page.dart';
 import '../services/navigation_service.dart';
 
 class AppSidebar extends StatelessWidget {
@@ -138,7 +139,14 @@ class AppSidebar extends StatelessWidget {
 
                 if (operacionVisible) sectionTitle("Operación"),
 
-                if (visible("Mesas")) menuItem(Icons.table_restaurant, "Mesas"),
+                if (visible("Mesas"))
+                  menuItem(
+                    Icons.query_builder,
+                    "Mesas",
+                    onTap: () {
+                      NavigationService.slideTo(context, const EditMesasPage());
+                    },
+                  ),
                 if (visible("Carta")) menuItem(Icons.menu_book, "Carta"),
                 if (visible("Inventario"))
                   menuItem(Icons.inventory_2_outlined, "Inventario"),
