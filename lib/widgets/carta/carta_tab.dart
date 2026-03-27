@@ -1,5 +1,7 @@
+//lib/widgets/carta/carta_tab.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../services/carta/carta_download.dart';
 import 'carta_dialog.dart';
 
 class CartaTab extends StatefulWidget {
@@ -11,6 +13,7 @@ class CartaTab extends StatefulWidget {
 
 class _CartaTabState extends State<CartaTab> {
   String filtroCategoria = "todas";
+  String filtroEstado = "todos";
   String busqueda = "";
 
   @override
@@ -22,6 +25,7 @@ class _CartaTabState extends State<CartaTab> {
           /// FILA 1
           Row(
             children: [
+              /// Dropdown Categorías
               Expanded(
                 flex: 2,
                 child: StreamBuilder<QuerySnapshot>(
@@ -29,9 +33,7 @@ class _CartaTabState extends State<CartaTab> {
                       .collection('categorias')
                       .snapshots(),
                   builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const SizedBox();
-                    }
+                    if (!snapshot.hasData) return const SizedBox();
 
                     List categorias = snapshot.data!.docs.where((doc) {
                       final data = doc.data() as Map<String, dynamic>;
@@ -77,6 +79,64 @@ class _CartaTabState extends State<CartaTab> {
 
               const SizedBox(width: 10),
 
+              /// Dropdown Estado
+              Expanded(
+                flex: 2,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      value: filtroEstado,
+                      dropdownColor: const Color(0xFF111827),
+                      style: const TextStyle(color: Colors.white),
+                      items: const [
+                        DropdownMenuItem(value: "todos", child: Text("Todos")),
+                        DropdownMenuItem(
+                          value: "activo",
+                          child: Text("Activo"),
+                        ),
+                        DropdownMenuItem(
+                          value: "desactivo",
+                          child: Text("Desactivo"),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          filtroEstado = value!;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              /// Botón cargar archivo
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.upload_file, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          /// FILA 2
+          Row(
+            children: [
+              /// Buscador
               Expanded(
                 flex: 3,
                 child: TextField(
@@ -99,16 +159,12 @@ class _CartaTabState extends State<CartaTab> {
                   },
                 ),
               ),
-            ],
-          ),
 
-          const SizedBox(height: 14),
+              const SizedBox(width: 10),
 
-          /// FILA 2
-          Row(
-            children: [
+              /// Nuevo Producto
               Expanded(
-                flex: 3,
+                flex: 2,
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
@@ -131,7 +187,7 @@ class _CartaTabState extends State<CartaTab> {
                       shadowColor: Colors.transparent,
                     ),
                     child: const Text(
-                      "Nuevo Producto",
+                      "Nuevo",
                       style: TextStyle(color: Colors.black),
                     ),
                   ),
@@ -140,26 +196,16 @@ class _CartaTabState extends State<CartaTab> {
 
               const SizedBox(width: 10),
 
+              /// Descargar archivo
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.upload_file, color: Colors.white),
-                ),
-              ),
-
-              const SizedBox(width: 10),
-
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: IconButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    await CartaDownload.descargarExcel(context);
+                  },
                   icon: const Icon(Icons.download, color: Colors.white),
                 ),
               ),
@@ -187,18 +233,19 @@ class _CartaTabState extends State<CartaTab> {
                   final data = doc.data() as Map<String, dynamic>;
 
                   final categoria = data['nombre_cat'] ?? '';
+                  final estado = data['estado'] ?? true;
 
                   final texto =
-                      "${data['nombre_cat']} "
-                              "${data['nombre_subcat']} "
-                              "${data['nombre']} "
-                              "${data['grupo']} "
-                              "${data['abreviado']} "
-                              "${data['precio']} "
-                              "${data['puntos']} "
-                              "${data['porcion']} "
-                              "${data['unidad']} "
-                              "${data['observacion']}"
+                      "${data['nombre_cat'] ?? ''} "
+                              "${data['nombre_subcat'] ?? ''} "
+                              "${data['nombre'] ?? ''} "
+                              "${data['grupo'] ?? ''} "
+                              "${data['abreviado'] ?? ''} "
+                              "${data['precio'] ?? ''} "
+                              "${data['puntos'] ?? ''} "
+                              "${data['porcion'] ?? ''} "
+                              "${data['unidad'] ?? ''} "
+                              "${data['observacion'] ?? ''}"
                           .toLowerCase();
 
                   final filtroCategoriaOk =
@@ -208,7 +255,14 @@ class _CartaTabState extends State<CartaTab> {
                   final filtroBusquedaOk =
                       busqueda.isEmpty || texto.contains(busqueda);
 
-                  return filtroCategoriaOk && filtroBusquedaOk;
+                  final filtroEstadoOk =
+                      filtroEstado == "todos" ||
+                      (filtroEstado == "activo" && estado == true) ||
+                      (filtroEstado == "desactivo" && estado == false);
+
+                  return filtroCategoriaOk &&
+                      filtroBusquedaOk &&
+                      filtroEstadoOk;
                 }).toList();
 
                 docs.sort((a, b) {
@@ -262,7 +316,7 @@ class _CartaTabState extends State<CartaTab> {
                                   const SizedBox(height: 4),
 
                                   Text(
-                                    "${data['nombre_cat']} • ${data['precio']} • ${data['porcion']} ${data['unidad']}",
+                                    "${data['nombre_cat'] ?? ''} • S/. ${data['precio'] ?? ''} • ${data['porcion'] ?? ''} ${data['unidad'] ?? ''}",
                                     style: const TextStyle(
                                       color: Colors.white54,
                                       fontSize: 12,

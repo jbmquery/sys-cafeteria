@@ -1,3 +1,4 @@
+#sys_cafeteria/pubspec.yaml
 name: sys_cafeteria
 description: "A new Flutter project."
 
@@ -14,6 +15,9 @@ dependencies:
   firebase_core: ^3.13.0
   firebase_auth: ^5.5.0
   cloud_firestore: ^5.6.6
+  excel: ^2.1.0
+  path_provider: ^2.1.2
+  open_file: ^3.3.2
 
   cupertino_icons: ^1.0.8
 
