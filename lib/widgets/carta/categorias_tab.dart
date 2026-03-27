@@ -104,6 +104,15 @@ class _CategoriasTabState extends State<CategoriasTab> {
 
                 List docs = snapshot.data!.docs;
 
+                docs = docs.where((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  final estado = data['estado'] ?? true;
+
+                  return filtroEstado == "todos" ||
+                      (filtroEstado == "activos" && estado == true) ||
+                      (filtroEstado == "inactivos" && estado == false);
+                }).toList();
+
                 return ListView.builder(
                   itemCount: docs.length,
                   itemBuilder: (context, index) {
