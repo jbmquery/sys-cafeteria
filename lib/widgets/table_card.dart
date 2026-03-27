@@ -1,3 +1,4 @@
+//lib/widgets/table_card.dart
 import 'package:flutter/material.dart';
 
 class TableCard extends StatelessWidget {
@@ -15,7 +16,7 @@ class TableCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(7),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: disponible
@@ -25,7 +26,7 @@ class TableCard extends StatelessWidget {
                 ]
               : [const Color(0xFFEF4444), const Color(0xFFB91C1C)],
         ),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.22),
@@ -42,8 +43,9 @@ class TableCard extends StatelessWidget {
             nombre,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Color.fromARGB(255, 0, 0, 0),
+              color: Colors.black,
               fontWeight: FontWeight.bold,
+              fontSize: 14,
             ),
           ),
 
@@ -62,8 +64,9 @@ class TableCard extends StatelessWidget {
           Text(
             disponible ? "Disponible" : "Ocupado",
             style: const TextStyle(
-              color: Color.fromARGB(255, 0, 0, 0),
+              color: Colors.black,
               fontSize: 10,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

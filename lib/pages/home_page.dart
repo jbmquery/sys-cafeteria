@@ -1,5 +1,7 @@
 //lib/pages/home_page.dart
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../widgets/app_sidebar.dart';
 import '../widgets/app_navbar.dart';
 import '../widgets/table_card.dart';
@@ -14,6 +16,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int currentTab = 0;
+
+  final List<String> tipos = ["Mesa", "Delivery", "Llevar", "Prueba"];
+
+  int extraerNumero(String texto) {
+    final regex = RegExp(r'\d+');
+    final match = regex.firstMatch(texto);
+
+    if (match != null) {
+      return int.tryParse(match.group(0)!) ?? 9999;
+    }
+
+    return 9999;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,54 +50,71 @@ class _HomePageState extends State<HomePage> {
               const AppNavbar(),
 
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  children: [
-                    sectionTitle("Mesas en el local"),
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('mesas')
+                      .orderBy('fecha_creacion', descending: false)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      );
+                    }
 
-                    gridSection([
-                      const TableCard(
-                        nombre: "Mesa 1",
-                        subtitulo: "4 personas",
-                        disponible: true,
-                      ),
-                      const TableCard(
-                        nombre: "Mesa 2",
-                        subtitulo: "2 personas",
-                        disponible: false,
-                      ),
-                      const TableCard(
-                        nombre: "Mesa 3",
-                        subtitulo: "6 personas",
-                        disponible: true,
-                      ),
-                      const TableCard(
-                        nombre: "Mesa 4",
-                        subtitulo: "4 personas",
-                        disponible: true,
-                      ),
-                      const TableCard(
-                        nombre: "Mesa 5",
-                        subtitulo: "2 personas",
-                        disponible: false,
-                      ),
-                      const TableCard(
-                        nombre: "Mesa 6",
-                        subtitulo: "6 personas",
-                        disponible: true,
-                      ),
-                      const TableCard(
-                        nombre: "Mesa 7",
-                        subtitulo: "6 personas",
-                        disponible: true,
-                      ),
-                      const TableCard(
-                        nombre: "Mesa 8",
-                        subtitulo: "6 personas",
-                        disponible: true,
-                      ),
-                    ]),
-                  ],
+                    final docs = snapshot.data!.docs;
+
+                    return ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      children: tipos.map((tipo) {
+                        final mesasGrupo = docs.where((doc) {
+                          final data = doc.data() as Map<String, dynamic>;
+                          return data['tipo_mesa'] == tipo;
+                        }).toList();
+
+                        mesasGrupo.sort((a, b) {
+                          final dataA = a.data() as Map<String, dynamic>;
+                          final dataB = b.data() as Map<String, dynamic>;
+
+                          final nombreA = dataA['nombre_mesa'] ?? '';
+                          final nombreB = dataB['nombre_mesa'] ?? '';
+
+                          final numA = extraerNumero(nombreA);
+                          final numB = extraerNumero(nombreB);
+
+                          if (numA != numB) {
+                            return numA.compareTo(numB);
+                          }
+
+                          return nombreA.compareTo(nombreB);
+                        });
+
+                        if (mesasGrupo.isEmpty) {
+                          return const SizedBox();
+                        }
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            sectionTitle(tipo),
+
+                            gridSection(
+                              mesasGrupo.map((mesa) {
+                                final data =
+                                    mesa.data() as Map<String, dynamic>;
+
+                                return TableCard(
+                                  nombre: data['nombre_mesa'] ?? '',
+                                  subtitulo: "${data['capacidad']} personas",
+                                  disponible: data['disponibilidad'] ?? true,
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    );
+                  },
                 ),
               ),
 
@@ -103,7 +135,7 @@ class _HomePageState extends State<HomePage> {
 
   static Widget sectionTitle(String titulo) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14, top: 10),
+      padding: const EdgeInsets.only(bottom: 14, top: 18),
       child: Text(
         titulo,
         style: const TextStyle(
