@@ -44,7 +44,7 @@ class _CategoriasTabState extends State<CategoriasTab> {
                       shadowColor: Colors.transparent,
                     ),
                     child: const Text(
-                      "Nuevo Producto",
+                      "Nueva Categoria",
                       style: TextStyle(color: Colors.black),
                     ),
                   ),
@@ -127,7 +127,7 @@ class _CategoriasTabState extends State<CategoriasTab> {
 
                           Expanded(
                             child: Text(
-                              item['nombre'],
+                              item['nombre_cat'],
                               style: const TextStyle(color: Colors.white),
                             ),
                           ),
