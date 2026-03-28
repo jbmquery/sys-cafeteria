@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/carta/carta_download.dart';
+import '../../services/carta/carta_upload.dart';
+import '../../services/carta/carta_upload_plantilla.dart';
 import 'carta_dialog.dart';
 
 class CartaTab extends StatefulWidget {
@@ -123,9 +125,16 @@ class _CartaTabState extends State<CartaTab> {
                   color: Colors.white.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.upload_file, color: Colors.white),
+                child: GestureDetector(
+                  onLongPress: () async {
+                    await CartaUploadPlantilla.descargarPlantilla(context);
+                  },
+                  child: IconButton(
+                    onPressed: () async {
+                      await CartaUpload.subirExcel(context);
+                    },
+                    icon: const Icon(Icons.upload_file, color: Colors.white),
+                  ),
                 ),
               ),
             ],

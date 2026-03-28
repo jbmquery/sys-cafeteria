@@ -1,7 +1,6 @@
 //lib/widgets/app_bottom_tabbar.dart
 import 'package:flutter/material.dart';
 import '../pages/home_page.dart';
-import '../pages/carta_page.dart';
 import '../pages/caja_page.dart';
 import '../services/navigation_service.dart';
 
@@ -46,8 +45,6 @@ class AppBottomTabBar extends StatelessWidget {
 
               if (index == 0) {
                 destino = const HomePage();
-              } else if (index == 1) {
-                destino = const CartaPage();
               } else {
                 destino = const CajaPage();
               }

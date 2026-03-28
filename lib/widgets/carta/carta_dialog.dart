@@ -67,7 +67,7 @@ class _CartaDialogState extends State<CartaDialog> {
         'nombre': nombreController.text.trim(),
         'grupo': grupoController.text.trim(),
         'abreviado': abreviadoController.text.trim(),
-        'precio': int.tryParse(precioController.text) ?? 0,
+        'precio': double.tryParse(precioController.text) ?? 0,
         'puntos': int.tryParse(puntosController.text) ?? 0,
         'porcion': porcionSeleccionada,
         'unidad': unidadSeleccionada,

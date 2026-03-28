@@ -1,11 +1,22 @@
-//lib/pages/carta_page.dart
+// lib/pages/carta_page.dart
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../widgets/app_sidebar.dart';
 import '../widgets/app_navbar.dart';
 import '../widgets/app_bottom_tabbar.dart';
 
 class CartaPage extends StatefulWidget {
-  const CartaPage({super.key});
+  final String nombreMesa;
+  final String uidMesa;
+  final String uidUsuarioAccion;
+
+  const CartaPage({
+    super.key,
+    required this.nombreMesa,
+    required this.uidMesa,
+    required this.uidUsuarioAccion,
+  });
 
   @override
   State<CartaPage> createState() => _CartaPageState();
@@ -14,29 +25,18 @@ class CartaPage extends StatefulWidget {
 class _CartaPageState extends State<CartaPage> {
   int currentTab = 1;
 
-  String categoriaSeleccionada = "Bebidas";
-
-  String mesaSeleccionada = "Mesa 4";
-
-  final categorias = ["Bebidas", "Postres", "Toppings", "Promos"];
-
-  final productos = [
-    {"nombre": "Capuccino", "precio": 8.0},
-    {"nombre": "Latte", "precio": 9.0},
-    {"nombre": "Cheesecake", "precio": 12.0},
-    {"nombre": "Brownie", "precio": 10.0},
-    {"nombre": "Té Helado", "precio": 7.0},
-    {"nombre": "Muffin", "precio": 6.0},
-  ];
+  String categoriaSeleccionada = "";
+  String searchText = "";
 
   List<Map<String, dynamic>> carrito = [];
   final List<OverlayEntry> _toasts = [];
+
+  final TextEditingController searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const AppSidebar(),
-
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -45,7 +45,6 @@ class _CartaPageState extends State<CartaPage> {
             end: Alignment.bottomRight,
           ),
         ),
-
         child: SafeArea(
           child: Column(
             children: [
@@ -65,18 +64,7 @@ class _CartaPageState extends State<CartaPage> {
 
               const SizedBox(height: 16),
 
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: productos.length,
-                  itemBuilder: (context, index) {
-                    return productCard(
-                      productos[index]["nombre"] as String,
-                      productos[index]["precio"] as double,
-                    );
-                  },
-                ),
-              ),
+              Expanded(child: productosSection()),
 
               AppBottomTabBar(
                 currentIndex: currentTab,
@@ -100,7 +88,7 @@ class _CartaPageState extends State<CartaPage> {
         children: [
           Expanded(
             child: Text(
-              "Pedido para: $mesaSeleccionada",
+              "Pedido para: ${widget.nombreMesa}",
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -108,7 +96,6 @@ class _CartaPageState extends State<CartaPage> {
               ),
             ),
           ),
-
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -125,43 +112,56 @@ class _CartaPageState extends State<CartaPage> {
   Widget categorySection() {
     return SizedBox(
       height: 46,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        itemCount: categorias.length,
-        itemBuilder: (context, index) {
-          final categoria = categorias[index];
-          final selected = categoria == categoriaSeleccionada;
+      child: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('categorias').snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const SizedBox();
+          }
 
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                categoriaSeleccionada = categoria;
-              });
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              margin: const EdgeInsets.only(right: 10),
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              decoration: BoxDecoration(
-                gradient: selected
-                    ? const LinearGradient(
-                        colors: [Color(0xFF00C8AA), Color(0xFF00A896)],
-                      )
-                    : null,
-                color: selected ? null : Colors.white.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Center(
-                child: Text(
-                  categoria,
-                  style: TextStyle(
-                    color: selected ? Colors.black : Colors.white70,
-                    fontWeight: FontWeight.w600,
+          final categorias = snapshot.data!.docs;
+
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            itemCount: categorias.length,
+            itemBuilder: (context, index) {
+              final data = categorias[index].data() as Map<String, dynamic>;
+              final categoria = data['nombre_cat'] ?? '';
+
+              final selected = categoria == categoriaSeleccionada;
+
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    categoriaSeleccionada = categoria;
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  margin: const EdgeInsets.only(right: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  decoration: BoxDecoration(
+                    gradient: selected
+                        ? const LinearGradient(
+                            colors: [Color(0xFF00C8AA), Color(0xFF00A896)],
+                          )
+                        : null,
+                    color: selected ? null : Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Center(
+                    child: Text(
+                      categoria,
+                      style: TextStyle(
+                        color: selected ? Colors.black : Colors.white70,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           );
         },
       ),
@@ -175,7 +175,13 @@ class _CartaPageState extends State<CartaPage> {
         children: [
           Expanded(
             child: TextField(
+              controller: searchController,
               style: const TextStyle(color: Colors.white),
+              onChanged: (value) {
+                setState(() {
+                  searchText = value.toLowerCase();
+                });
+              },
               decoration: InputDecoration(
                 hintText: "Buscar producto...",
                 hintStyle: const TextStyle(color: Colors.white54),
@@ -229,7 +235,60 @@ class _CartaPageState extends State<CartaPage> {
     );
   }
 
-  Widget productCard(String nombre, double precio) {
+  Widget productosSection() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('carta')
+          .where('estado', isEqualTo: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          );
+        }
+
+        final docs = snapshot.data!.docs;
+
+        final filtrados = docs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+
+          final grupo = (data['grupo'] ?? '').toString();
+
+          final matchCategoria =
+              categoriaSeleccionada.isEmpty ||
+              grupo.toLowerCase() == categoriaSeleccionada.toLowerCase();
+
+          final matchSearch = grupo.toLowerCase().contains(
+            searchText.toLowerCase(),
+          );
+
+          return matchCategoria && matchSearch;
+        }).toList();
+
+        final Map<String, List<QueryDocumentSnapshot>> agrupados = {};
+
+        for (var doc in filtrados) {
+          final data = doc.data() as Map<String, dynamic>;
+          final grupo = data['grupo'] ?? '';
+
+          agrupados.putIfAbsent(grupo, () => []);
+          agrupados[grupo]!.add(doc);
+        }
+
+        return ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          children: agrupados.entries.map((entry) {
+            return productCard(entry.key, entry.value);
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Widget productCard(String grupo, List<QueryDocumentSnapshot> items) {
+    final precio = items.first['precio'];
+
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
@@ -237,46 +296,62 @@ class _CartaPageState extends State<CartaPage> {
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(18),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                nombre,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                "S/ ${precio.toStringAsFixed(2)}",
-                style: const TextStyle(color: Colors.white70),
-              ),
-            ],
+          Text(
+            grupo,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
           ),
 
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                carrito.add({"nombre": nombre, "precio": precio});
-              });
+          const SizedBox(height: 6),
 
-              mostrarToast("$nombre agregado");
-            },
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF00C8AA), Color(0xFF00A896)],
+          Text(
+            "S/ ${precio.toString()}",
+            style: const TextStyle(color: Colors.white70),
+          ),
+
+          const SizedBox(height: 12),
+
+          Wrap(
+            spacing: 8,
+            children: items.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+
+              final porcion = data['porcion'];
+              final unidad = data['unidad'];
+              final disponible = data['disponibilidad'] ?? true;
+
+              String texto = "+";
+
+              if ((porcion != null && porcion.toString().isNotEmpty) ||
+                  (unidad != null && unidad.toString().isNotEmpty)) {
+                texto = "${porcion ?? ''} ${unidad ?? ''}".trim();
+              }
+
+              return ElevatedButton(
+                onPressed: disponible
+                    ? () {
+                        setState(() {
+                          carrito.add(data);
+                        });
+
+                        mostrarToast("$grupo agregado");
+                      }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: disponible
+                      ? const Color(0xFF00C8AA)
+                      : Colors.grey.shade700,
+                  foregroundColor: Colors.black,
                 ),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.add, color: Colors.black),
-            ),
+                child: Text(texto),
+              );
+            }).toList(),
           ),
         ],
       ),
@@ -286,13 +361,11 @@ class _CartaPageState extends State<CartaPage> {
   void mostrarToast(String mensaje) {
     final overlay = Overlay.of(context);
 
-    final topOffset = 60.0 + (_toasts.length * 60);
-
     late OverlayEntry entry;
 
     entry = OverlayEntry(
       builder: (_) => Positioned(
-        top: topOffset,
+        top: 60,
         left: 20,
         right: 20,
         child: Material(
@@ -317,240 +390,12 @@ class _CartaPageState extends State<CartaPage> {
       ),
     );
 
-    _toasts.add(entry);
     overlay.insert(entry);
 
     Future.delayed(const Duration(milliseconds: 500), () {
       entry.remove();
-      _toasts.remove(entry);
     });
   }
 
-  void abrirCarrito() {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: "",
-      barrierColor: Colors.black54,
-      transitionDuration: const Duration(milliseconds: 300),
-
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            double subtotal = carrito.fold(
-              0.0,
-              (double sum, item) => sum + (item["precio"] as double),
-            );
-
-            return Align(
-              alignment: Alignment.centerRight,
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.82,
-                  height: double.infinity,
-                  padding: const EdgeInsets.all(18),
-
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF111827),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      bottomLeft: Radius.circular(24),
-                    ),
-                  ),
-
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 40),
-
-                      const Text(
-                        "Carrito",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      Expanded(
-                        child: carrito.isEmpty
-                            ? const Center(
-                                child: Text(
-                                  "Sin productos",
-                                  style: TextStyle(color: Colors.white54),
-                                ),
-                              )
-                            : ListView.builder(
-                                itemCount: carrito.length,
-                                itemBuilder: (context, index) {
-                                  final item = carrito[index];
-
-                                  return Container(
-                                    margin: const EdgeInsets.only(bottom: 12),
-                                    padding: const EdgeInsets.all(14),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.05),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                item["nombre"] as String,
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-
-                                              const SizedBox(height: 4),
-
-                                              Text(
-                                                "S/ ${(item["precio"] as double).toStringAsFixed(2)}",
-                                                style: const TextStyle(
-                                                  color: Colors.white70,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-
-                                        GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              carrito.removeAt(index);
-                                            });
-
-                                            setDialogState(() {});
-                                          },
-                                          child: const Icon(
-                                            Icons.delete_outline,
-                                            color: Colors.redAccent,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                      ),
-
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              "Subtotal",
-                              style: TextStyle(color: Colors.white70),
-                            ),
-
-                            Text(
-                              "S/ ${subtotal.toStringAsFixed(2)}",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF374151),
-                                    Color(0xFF1F2937),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-                                  shadowColor: Colors.transparent,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    carrito.clear();
-                                  });
-
-                                  setDialogState(() {});
-                                },
-                                child: const Text("Cancelar"),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(width: 10),
-
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF00C8AA),
-                                    Color(0xFF00A896),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-                                  shadowColor: Colors.transparent,
-                                ),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text(
-                                  "Guardar",
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 20),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(1, 0),
-            end: Offset.zero,
-          ).animate(animation),
-          child: child,
-        );
-      },
-    );
-  }
+  void abrirCarrito() {}
 }

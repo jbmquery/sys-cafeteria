@@ -6,6 +6,7 @@ import '../widgets/app_sidebar.dart';
 import '../widgets/app_navbar.dart';
 import '../widgets/table_card.dart';
 import '../widgets/app_bottom_tabbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,6 +16,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final uidUsuarioActual = FirebaseAuth.instance.currentUser!.uid;
   int currentTab = 0;
 
   final List<String> tipos = ["Mesa", "Delivery", "Llevar", "Prueba"];
@@ -107,6 +109,8 @@ class _HomePageState extends State<HomePage> {
                                   nombre: data['nombre_mesa'] ?? '',
                                   subtitulo: "${data['capacidad']} personas",
                                   disponible: data['disponibilidad'] ?? true,
+                                  uidMesa: mesa.id,
+                                  uidUsuarioAccion: uidUsuarioActual,
                                 );
                               }).toList(),
                             ),
