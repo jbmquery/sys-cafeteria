@@ -113,13 +113,26 @@ class _CartaPageState extends State<CartaPage> {
     return SizedBox(
       height: 46,
       child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('categorias').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('categorias')
+            .orderBy('fecha_creacion')
+            .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const SizedBox();
           }
 
           final categorias = snapshot.data!.docs;
+
+          if (categorias.isNotEmpty && categoriaSeleccionada.isEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final firstData = categorias.first.data() as Map<String, dynamic>;
+
+              setState(() {
+                categoriaSeleccionada = firstData['nombre_cat'] ?? '';
+              });
+            });
+          }
 
           return ListView.builder(
             scrollDirection: Axis.horizontal,
@@ -254,10 +267,11 @@ class _CartaPageState extends State<CartaPage> {
           final data = doc.data() as Map<String, dynamic>;
 
           final grupo = (data['grupo'] ?? '').toString();
+          final nombreCat = (data['nombre_cat'] ?? '').toString();
 
           final matchCategoria =
               categoriaSeleccionada.isEmpty ||
-              grupo.toLowerCase() == categoriaSeleccionada.toLowerCase();
+              nombreCat.toLowerCase() == categoriaSeleccionada.toLowerCase();
 
           final matchSearch = grupo.toLowerCase().contains(
             searchText.toLowerCase(),
@@ -287,38 +301,25 @@ class _CartaPageState extends State<CartaPage> {
   }
 
   Widget productCard(String grupo, List<QueryDocumentSnapshot> items) {
-    final precio = items.first['precio'];
-
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(18),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            grupo,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
+          Expanded(
+            child: Text(
+              grupo,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
             ),
           ),
 
-          const SizedBox(height: 6),
-
-          Text(
-            "S/ ${precio.toString()}",
-            style: const TextStyle(color: Colors.white70),
-          ),
-
-          const SizedBox(height: 12),
-
           Wrap(
-            spacing: 8,
+            spacing: 6,
             children: items.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
 
@@ -333,8 +334,8 @@ class _CartaPageState extends State<CartaPage> {
                 texto = "${porcion ?? ''} ${unidad ?? ''}".trim();
               }
 
-              return ElevatedButton(
-                onPressed: disponible
+              return GestureDetector(
+                onTap: disponible
                     ? () {
                         setState(() {
                           carrito.add(data);
@@ -343,13 +344,35 @@ class _CartaPageState extends State<CartaPage> {
                         mostrarToast("$grupo agregado");
                       }
                     : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: disponible
-                      ? const Color(0xFF00C8AA)
-                      : Colors.grey.shade700,
-                  foregroundColor: Colors.black,
+                child: Container(
+                  constraints: const BoxConstraints(minWidth: 42),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: disponible
+                        ? const LinearGradient(
+                            colors: [Color(0xFF00C8AA), Color(0xFF00A896)],
+                          )
+                        : const LinearGradient(
+                            colors: [
+                              Color.fromARGB(255, 243, 59, 157),
+                              Color.fromARGB(255, 200, 6, 109),
+                            ],
+                          ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    texto,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: disponible ? Colors.black : Colors.white70,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
-                child: Text(texto),
               );
             }).toList(),
           ),

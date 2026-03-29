@@ -45,7 +45,10 @@ class TableCard extends StatelessWidget {
                     const Color(0xFF00C8AA),
                     const Color.fromARGB(255, 1, 144, 130),
                   ]
-                : [const Color(0xFFEF4444), const Color(0xFFB91C1C)],
+                : [
+                    const Color.fromARGB(255, 243, 59, 157),
+                    const Color.fromARGB(255, 200, 6, 109),
+                  ],
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
