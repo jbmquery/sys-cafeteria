@@ -236,7 +236,12 @@ class _CartaPageState extends State<CartaPage> {
                       shape: BoxShape.circle,
                     ),
                     child: Text(
-                      carrito.length.toString(),
+                      carrito
+                          .fold(
+                            0,
+                            (sum, item) => sum + (item["cantidad"] as int),
+                          )
+                          .toString(),
                       style: const TextStyle(color: Colors.white, fontSize: 10),
                     ),
                   ),
@@ -338,7 +343,17 @@ class _CartaPageState extends State<CartaPage> {
                 onTap: disponible
                     ? () {
                         setState(() {
-                          carrito.add(data);
+                          final index = carrito.indexWhere(
+                            (item) =>
+                                item["grupo"] == data["grupo"] &&
+                                item["precio"] == data["precio"],
+                          );
+
+                          if (index != -1) {
+                            carrito[index]["cantidad"] += 1;
+                          } else {
+                            carrito.add({...data, "cantidad": 1});
+                          }
                         });
 
                         mostrarToast("$grupo agregado");
@@ -433,7 +448,8 @@ class _CartaPageState extends State<CartaPage> {
           builder: (context, setDialogState) {
             double subtotal = carrito.fold(
               0.0,
-              (double sum, item) => sum + ((item["precio"] as num).toDouble()),
+              (double sum, item) =>
+                  sum + ((item["precio"] as num).toDouble() * item["cantidad"]),
             );
 
             return Align(
@@ -508,7 +524,9 @@ class _CartaPageState extends State<CartaPage> {
                                               const SizedBox(height: 4),
 
                                               Text(
-                                                "S/ ${((item["precio"] as num).toDouble()).toStringAsFixed(2)}",
+                                                "S/ ${((item["precio"] as num).toDouble()).toStringAsFixed(2)}"
+                                                " - x${item["cantidad"]}"
+                                                " - S/ ${(((item["precio"] as num).toDouble()) * item["cantidad"]).toStringAsFixed(2)}",
                                                 style: const TextStyle(
                                                   color: Colors.white70,
                                                 ),
@@ -520,7 +538,12 @@ class _CartaPageState extends State<CartaPage> {
                                         GestureDetector(
                                           onTap: () {
                                             setState(() {
-                                              carrito.removeAt(index);
+                                              if (carrito[index]["cantidad"] >
+                                                  1) {
+                                                carrito[index]["cantidad"] -= 1;
+                                              } else {
+                                                carrito.removeAt(index);
+                                              }
                                             });
 
                                             setDialogState(() {});
