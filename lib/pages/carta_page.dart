@@ -420,5 +420,233 @@ class _CartaPageState extends State<CartaPage> {
     });
   }
 
-  void abrirCarrito() {}
+  void abrirCarrito() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "",
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 300),
+
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            double subtotal = carrito.fold(
+              0.0,
+              (double sum, item) => sum + ((item["precio"] as num).toDouble()),
+            );
+
+            return Align(
+              alignment: Alignment.centerRight,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.82,
+                  height: double.infinity,
+                  padding: const EdgeInsets.all(18),
+
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF111827),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      bottomLeft: Radius.circular(24),
+                    ),
+                  ),
+
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 40),
+
+                      const Text(
+                        "Carrito",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      Expanded(
+                        child: carrito.isEmpty
+                            ? const Center(
+                                child: Text(
+                                  "Sin productos",
+                                  style: TextStyle(color: Colors.white54),
+                                ),
+                              )
+                            : ListView.builder(
+                                itemCount: carrito.length,
+                                itemBuilder: (context, index) {
+                                  final item = carrito[index];
+
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.all(14),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.05),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                item["grupo"] ??
+                                                    item["nombre"] ??
+                                                    "",
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+
+                                              const SizedBox(height: 4),
+
+                                              Text(
+                                                "S/ ${((item["precio"] as num).toDouble()).toStringAsFixed(2)}",
+                                                style: const TextStyle(
+                                                  color: Colors.white70,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              carrito.removeAt(index);
+                                            });
+
+                                            setDialogState(() {});
+                                          },
+                                          child: const Icon(
+                                            Icons.delete_outline,
+                                            color: Colors.redAccent,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Subtotal",
+                              style: TextStyle(color: Colors.white70),
+                            ),
+
+                            Text(
+                              "S/ ${subtotal.toStringAsFixed(2)}",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF374151),
+                                    Color(0xFF1F2937),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    carrito.clear();
+                                  });
+
+                                  setDialogState(() {});
+                                },
+                                child: const Text("Cancelar"),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF00C8AA),
+                                    Color(0xFF00A896),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text(
+                                  "Guardar",
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1, 0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: child,
+        );
+      },
+    );
+  }
 }
