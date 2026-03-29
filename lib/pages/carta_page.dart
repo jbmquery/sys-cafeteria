@@ -23,7 +23,7 @@ class CartaPage extends StatefulWidget {
 }
 
 class _CartaPageState extends State<CartaPage> {
-  int currentTab = 1;
+  int currentTab = 0;
 
   String categoriaSeleccionada = "";
   String searchText = "";
