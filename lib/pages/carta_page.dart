@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../widgets/app_sidebar.dart';
 import '../widgets/app_navbar.dart';
 import '../widgets/app_bottom_tabbar.dart';
+import '../widgets/carta/toppings_dialog.dart';
 
 class CartaPage extends StatefulWidget {
   final String nombreMesa;
@@ -342,7 +343,25 @@ class _CartaPageState extends State<CartaPage> {
 
               return GestureDetector(
                 onTap: disponible
-                    ? () {
+                    ? () async {
+                        if (data["nombre_cat"] == "Toppings") {
+                          final resultado = await showDialog(
+                            context: context,
+                            builder: (_) =>
+                                ToppingsDialog(carrito: carrito, topping: data),
+                          );
+
+                          if (resultado != null) {
+                            setState(() {
+                              carrito.add(resultado);
+                            });
+
+                            mostrarToast("$grupo agregado");
+                          }
+
+                          return;
+                        }
+
                         setState(() {
                           final index = carrito.indexWhere(
                             (item) =>
@@ -355,7 +374,12 @@ class _CartaPageState extends State<CartaPage> {
                           if (index != -1) {
                             carrito[index]["cantidad"] += 1;
                           } else {
-                            carrito.add({...data, "cantidad": 1});
+                            carrito.add({
+                              ...data,
+                              "cantidad": 1,
+                              "id_detalle_padre_temporal": data.hashCode
+                                  .toString(),
+                            });
                           }
                         });
 
@@ -469,11 +493,13 @@ class _CartaPageState extends State<CartaPage> {
         "subtotal": subtotal,
       });
 
+      final Map<String, String> detalleIds = {};
+
       for (final item in carrito) {
         final cantidad = item["cantidad"] as int;
 
         for (int i = 0; i < cantidad; i++) {
-          await pedidoRef.collection("detalle").add({
+          final detalleRef = await pedidoRef.collection("detalle").add({
             "nombre": item["nombre"] ?? item["grupo"] ?? "",
             "precio": (item["precio"] as num).toDouble(),
             "porcion": item["porcion"] ?? "",
@@ -489,6 +515,18 @@ class _CartaPageState extends State<CartaPage> {
             "cuenta": 0,
             "id_detalle_padre": "",
           });
+
+          final temporal = item["id_detalle_padre_temporal"]?.toString() ?? "";
+
+          if (item["nombre_cat"] != "Toppings") {
+            detalleIds[temporal] = detalleRef.id;
+          }
+
+          if (item["nombre_cat"] == "Toppings") {
+            await detalleRef.update({
+              "id_detalle_padre": detalleIds[temporal] ?? "",
+            });
+          }
         }
       }
 
