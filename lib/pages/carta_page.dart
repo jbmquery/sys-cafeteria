@@ -513,9 +513,30 @@ class _CartaPageState extends State<CartaPage> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                item["grupo"] ??
-                                                    item["nombre"] ??
-                                                    "",
+                                                (() {
+                                                  final nombre =
+                                                      item["grupo"] ??
+                                                      item["nombre"] ??
+                                                      "";
+
+                                                  final porcion =
+                                                      item["porcion"]
+                                                          ?.toString()
+                                                          .trim() ??
+                                                      "";
+                                                  final unidad =
+                                                      item["unidad"]
+                                                          ?.toString()
+                                                          .trim() ??
+                                                      "";
+
+                                                  final detalle =
+                                                      "$porcion $unidad".trim();
+
+                                                  return detalle.isNotEmpty
+                                                      ? "$nombre - $detalle"
+                                                      : nombre;
+                                                })(),
                                                 style: const TextStyle(
                                                   color: Colors.white,
                                                 ),
