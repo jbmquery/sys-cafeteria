@@ -1,6 +1,7 @@
 // lib/pages/carta_page.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 import '../widgets/app_sidebar.dart';
 import '../widgets/app_navbar.dart';
@@ -346,7 +347,9 @@ class _CartaPageState extends State<CartaPage> {
                           final index = carrito.indexWhere(
                             (item) =>
                                 item["grupo"] == data["grupo"] &&
-                                item["precio"] == data["precio"],
+                                item["precio"] == data["precio"] &&
+                                item["porcion"] == data["porcion"] &&
+                                item["unidad"] == data["unidad"],
                           );
 
                           if (index != -1) {
@@ -433,6 +436,76 @@ class _CartaPageState extends State<CartaPage> {
     Future.delayed(const Duration(milliseconds: 500), () {
       entry.remove();
     });
+  }
+
+  Future<void> guardarPedido(double subtotal) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+
+      final mesaDoc = await firestore
+          .collection('mesas')
+          .doc(widget.uidMesa)
+          .get();
+
+      final mesaData = mesaDoc.data() ?? {};
+
+      final now = DateTime.now();
+      final horaFormateada = DateFormat('HH:mm:ss').format(now);
+
+      final pedidoRef = await firestore.collection('pedidos').add({
+        "nombre_mesa": widget.nombreMesa,
+        "nombre_cliente": "",
+        "uid_usuario": widget.uidUsuarioAccion,
+        "fecha": Timestamp.now(),
+        "hora_pedido": horaFormateada,
+        "hora_pago": "",
+        "estado": "abierto",
+        "cantidad_clientes": mesaData["capacidad"] ?? 0,
+        "observacion": "",
+        "forma_pago": "",
+        "puntos_canjeados_total": 0,
+        "monto_pagado": 0.0,
+        "monto_vuelto": 0.0,
+        "subtotal": subtotal,
+      });
+
+      for (final item in carrito) {
+        final cantidad = item["cantidad"] as int;
+
+        for (int i = 0; i < cantidad; i++) {
+          await pedidoRef.collection("detalle").add({
+            "nombre": item["nombre"] ?? item["grupo"] ?? "",
+            "precio": (item["precio"] as num).toDouble(),
+            "porcion": item["porcion"] ?? "",
+            "unidad": item["unidad"] ?? "",
+            "nombre_cat": item["nombre_cat"] ?? "",
+            "nombre_subcat": item["nombre_subcat"] ?? "",
+            "puntos": item["puntos"] ?? 0,
+            "abreviado": item["abreviado"] ?? "",
+            "observacion": "",
+            "es_canjeable": true,
+            "estado": "pendiente",
+            "canjeado_por": "",
+            "cuenta": 0,
+            "id_detalle_padre": "",
+          });
+        }
+      }
+
+      // ✅ AQUÍ CAMBIA EL ESTADO DE LA MESA
+      await firestore.collection('mesas').doc(widget.uidMesa).update({
+        "disponibilidad": false,
+      });
+
+      setState(() {
+        carrito.clear();
+      });
+
+      mostrarToast("Pedido guardado");
+    } catch (e) {
+      debugPrint(e.toString());
+      mostrarToast("Error al guardar");
+    }
   }
 
   void abrirCarrito() {
@@ -659,8 +732,12 @@ class _CartaPageState extends State<CartaPage> {
                                   backgroundColor: Colors.transparent,
                                   shadowColor: Colors.transparent,
                                 ),
-                                onPressed: () {
-                                  Navigator.pop(context);
+                                onPressed: () async {
+                                  await guardarPedido(subtotal);
+
+                                  if (mounted) {
+                                    Navigator.pop(context);
+                                  }
                                 },
                                 child: const Text(
                                   "Guardar",
