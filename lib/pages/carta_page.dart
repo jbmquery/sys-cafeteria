@@ -1,4 +1,6 @@
 // lib/pages/carta_page.dart
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -495,7 +497,12 @@ class _CartaPageState extends State<CartaPage> {
 
       final Map<String, String> detalleIds = {};
 
-      for (final item in carrito) {
+      final carritoOrdenado = [
+        ...carrito.where((e) => e["nombre_cat"] != "Toppings"),
+        ...carrito.where((e) => e["nombre_cat"] == "Toppings"),
+      ];
+
+      for (final item in carritoOrdenado) {
         final cantidad = item["cantidad"] as int;
 
         for (int i = 0; i < cantidad; i++) {
@@ -607,12 +614,19 @@ class _CartaPageState extends State<CartaPage> {
                                 itemCount: carrito.length,
                                 itemBuilder: (context, index) {
                                   final item = carrito[index];
+                                  final esTopping =
+                                      item["nombre_cat"] == "Toppings";
 
                                   return Container(
-                                    margin: const EdgeInsets.only(bottom: 12),
+                                    margin: EdgeInsets.only(
+                                      bottom: 12,
+                                      left: esTopping ? 28 : 0,
+                                    ),
                                     padding: const EdgeInsets.all(14),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.05),
+                                      color: esTopping
+                                          ? Colors.white.withOpacity(0.03)
+                                          : Colors.white.withOpacity(0.05),
                                       borderRadius: BorderRadius.circular(16),
                                     ),
 
@@ -644,9 +658,14 @@ class _CartaPageState extends State<CartaPage> {
                                                   final detalle =
                                                       "$porcion $unidad".trim();
 
-                                                  return detalle.isNotEmpty
+                                                  final base =
+                                                      detalle.isNotEmpty
                                                       ? "$nombre - $detalle"
                                                       : nombre;
+
+                                                  return esTopping
+                                                      ? "↳ $base"
+                                                      : base;
                                                 })(),
                                                 style: const TextStyle(
                                                   color: Colors.white,
@@ -669,10 +688,19 @@ class _CartaPageState extends State<CartaPage> {
 
                                         GestureDetector(
                                           onTap: () {
+                                            final temporal =
+                                                carrito[index]["id_detalle_padre_temporal"]
+                                                    ?.toString() ??
+                                                "";
+
                                             setState(() {
-                                              if (carrito[index]["cantidad"] >
-                                                  1) {
-                                                carrito[index]["cantidad"] -= 1;
+                                              if (carrito[index]["nombre_cat"] !=
+                                                  "Toppings") {
+                                                carrito.removeWhere(
+                                                  (item) =>
+                                                      item["id_detalle_padre_temporal"] ==
+                                                      temporal,
+                                                );
                                               } else {
                                                 carrito.removeAt(index);
                                               }
@@ -680,6 +708,7 @@ class _CartaPageState extends State<CartaPage> {
 
                                             setDialogState(() {});
                                           },
+
                                           child: const Icon(
                                             Icons.delete_outline,
                                             color: Colors.redAccent,
@@ -703,7 +732,7 @@ class _CartaPageState extends State<CartaPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
-                              "Subtotal",
+                              "Subtotal pedido",
                               style: TextStyle(color: Colors.white70),
                             ),
 
@@ -712,6 +741,7 @@ class _CartaPageState extends State<CartaPage> {
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
