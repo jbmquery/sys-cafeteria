@@ -10,6 +10,7 @@ import '../widgets/app_navbar.dart';
 import '../widgets/app_bottom_tabbar.dart';
 import '../widgets/carta/toppings_dialog.dart';
 import '../widgets/carta/cambiar_mesa_dialog.dart';
+import '../widgets/carta/cantidad_personas_dialog.dart';
 
 class CartaPage extends StatefulWidget {
   final String nombreMesa;
@@ -492,7 +493,10 @@ class _CartaPageState extends State<CartaPage> {
     }
   }
 
-  Future<void> guardarPedido(double subtotal) async {
+  Future<void> guardarPedido(
+    double subtotal, {
+    int? cantidadClientesManual,
+  }) async {
     try {
       final firestore = FirebaseFirestore.instance;
 
@@ -514,7 +518,8 @@ class _CartaPageState extends State<CartaPage> {
         "hora_pedido": horaFormateada,
         "hora_pago": "",
         "estado": "abierto",
-        "cantidad_clientes": mesaData["capacidad"] ?? 0,
+        "cantidad_clientes":
+            cantidadClientesManual ?? mesaData["capacidad"] ?? 0,
         "observacion": "",
         "forma_pago": "",
         "puntos_canjeados_total": 0,
@@ -579,6 +584,36 @@ class _CartaPageState extends State<CartaPage> {
       debugPrint(e.toString());
       mostrarToast("Error al guardar");
     }
+  }
+
+  Future<void> guardarPedidoConValidacion(double subtotal) async {
+    final firestore = FirebaseFirestore.instance;
+
+    final mesaDoc = await firestore
+        .collection('mesas')
+        .doc(uidMesaActual)
+        .get();
+
+    final mesaData = mesaDoc.data() ?? {};
+
+    final tipoMesa = mesaData["tipo_mesa"] ?? "";
+
+    if (tipoMesa == "Mesa") {
+      final cantidad = await showDialog<int>(
+        context: context,
+        builder: (_) => const CantidadPersonasDialog(),
+      );
+
+      if (cantidad == null) {
+        return;
+      }
+
+      await guardarPedido(subtotal, cantidadClientesManual: cantidad);
+
+      return;
+    }
+
+    await guardarPedido(subtotal);
   }
 
   void abrirCarrito() {
@@ -850,7 +885,7 @@ class _CartaPageState extends State<CartaPage> {
                                   shadowColor: Colors.transparent,
                                 ),
                                 onPressed: () async {
-                                  await guardarPedido(subtotal);
+                                  await guardarPedidoConValidacion(subtotal);
 
                                   if (mounted) {
                                     Navigator.pop(context);
