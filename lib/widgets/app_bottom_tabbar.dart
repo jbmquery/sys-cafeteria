@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../pages/home_page.dart';
 import '../pages/caja_page.dart';
 import '../services/navigation_service.dart';
+import '../pages/orden_page.dart';
 
 class AppBottomTabBar extends StatelessWidget {
   final int currentIndex;
@@ -45,6 +46,8 @@ class AppBottomTabBar extends StatelessWidget {
 
               if (index == 0) {
                 destino = const HomePage();
+              } else if (index == 1) {
+                destino = const OrdenPage();
               } else {
                 destino = const CajaPage();
               }
