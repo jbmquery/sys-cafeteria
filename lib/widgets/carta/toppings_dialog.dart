@@ -60,6 +60,24 @@ class _ToppingsDialogState extends State<ToppingsDialog> {
                   itemBuilder: (context, index) {
                     final item = productosBase[index];
 
+                    final temporal =
+                        item["id_detalle_padre_temporal"]?.toString() ?? "";
+
+                    final toppingsRelacionados = widget.carrito.where((e) {
+                      return e["nombre_cat"] == "Toppings" &&
+                          e["id_detalle_padre_temporal"] == temporal;
+                    }).toList();
+
+                    final nombre = item["grupo"] ?? "";
+                    final porcion = item["porcion"]?.toString().trim() ?? "";
+                    final unidad = item["unidad"]?.toString().trim() ?? "";
+
+                    final detalle = "$porcion $unidad".trim();
+
+                    final titulo = detalle.isNotEmpty
+                        ? "$nombre - $detalle"
+                        : nombre;
+
                     final selected = selectedIndex == index;
 
                     return GestureDetector(
@@ -77,9 +95,33 @@ class _ToppingsDialogState extends State<ToppingsDialog> {
                               : Colors.white.withOpacity(0.05),
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Text(
-                          item["grupo"] ?? "",
-                          style: const TextStyle(color: Colors.white),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              titulo,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+
+                            if (toppingsRelacionados.isNotEmpty)
+                              ...toppingsRelacionados.map((topping) {
+                                final toppingNombre = topping["grupo"] ?? "";
+
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 8,
+                                    top: 4,
+                                  ),
+                                  child: Text(
+                                    "↳ $toppingNombre",
+                                    style: const TextStyle(
+                                      color: Colors.greenAccent,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                );
+                              }),
+                          ],
                         ),
                       ),
                     );
