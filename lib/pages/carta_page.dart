@@ -9,6 +9,7 @@ import '../widgets/app_sidebar.dart';
 import '../widgets/app_navbar.dart';
 import '../widgets/app_bottom_tabbar.dart';
 import '../widgets/carta/toppings_dialog.dart';
+import '../widgets/carta/cambiar_mesa_dialog.dart';
 
 class CartaPage extends StatefulWidget {
   final String nombreMesa;
@@ -27,7 +28,17 @@ class CartaPage extends StatefulWidget {
 }
 
 class _CartaPageState extends State<CartaPage> {
+  String nombreMesaActual = "";
+  String uidMesaActual = "";
+
   int currentTab = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    nombreMesaActual = widget.nombreMesa;
+    uidMesaActual = widget.uidMesa;
+  }
 
   String categoriaSeleccionada = "";
   String searchText = "";
@@ -92,7 +103,7 @@ class _CartaPageState extends State<CartaPage> {
         children: [
           Expanded(
             child: Text(
-              "Pedido para: ${widget.nombreMesa}",
+              "Pedido para: $nombreMesaActual",
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -100,13 +111,16 @@ class _CartaPageState extends State<CartaPage> {
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(16),
+          GestureDetector(
+            onTap: abrirCambiarMesaDialog,
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(Icons.swap_horiz, color: Colors.white),
             ),
-            child: const Icon(Icons.swap_horiz, color: Colors.white),
           ),
         ],
       ),
@@ -236,7 +250,7 @@ class _CartaPageState extends State<CartaPage> {
                   child: Container(
                     padding: const EdgeInsets.all(5),
                     decoration: const BoxDecoration(
-                      color: Colors.red,
+                      color: Color.fromARGB(255, 243, 59, 157),
                       shape: BoxShape.circle,
                     ),
                     child: Text(
@@ -462,13 +476,29 @@ class _CartaPageState extends State<CartaPage> {
     });
   }
 
+  void abrirCambiarMesaDialog() async {
+    final resultado = await showDialog(
+      context: context,
+      builder: (_) => CambiarMesaDialog(uidMesaActual: uidMesaActual),
+    );
+
+    if (resultado != null) {
+      setState(() {
+        nombreMesaActual = resultado["nombre"];
+        uidMesaActual = resultado["uid"];
+      });
+
+      mostrarToast("Mesa cambiada");
+    }
+  }
+
   Future<void> guardarPedido(double subtotal) async {
     try {
       final firestore = FirebaseFirestore.instance;
 
       final mesaDoc = await firestore
           .collection('mesas')
-          .doc(widget.uidMesa)
+          .doc(uidMesaActual)
           .get();
 
       final mesaData = mesaDoc.data() ?? {};
@@ -477,7 +507,7 @@ class _CartaPageState extends State<CartaPage> {
       final horaFormateada = DateFormat('HH:mm:ss').format(now);
 
       final pedidoRef = await firestore.collection('pedidos').add({
-        "nombre_mesa": widget.nombreMesa,
+        "nombre_mesa": nombreMesaActual,
         "nombre_cliente": "",
         "uid_usuario": widget.uidUsuarioAccion,
         "fecha": Timestamp.now(),
@@ -536,7 +566,7 @@ class _CartaPageState extends State<CartaPage> {
       }
 
       // ✅ AQUÍ CAMBIA EL ESTADO DE LA MESA
-      await firestore.collection('mesas').doc(widget.uidMesa).update({
+      await firestore.collection('mesas').doc(uidMesaActual).update({
         "disponibilidad": false,
       });
 
@@ -725,7 +755,12 @@ class _CartaPageState extends State<CartaPage> {
 
                                           child: const Icon(
                                             Icons.delete_outline,
-                                            color: Colors.redAccent,
+                                            color: Color.fromARGB(
+                                              255,
+                                              243,
+                                              59,
+                                              157,
+                                            ),
                                           ),
                                         ),
                                       ],
