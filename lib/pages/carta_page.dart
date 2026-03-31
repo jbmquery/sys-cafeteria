@@ -373,16 +373,14 @@ class _CartaPageState extends State<CartaPage> {
                                 item["unidad"] == data["unidad"],
                           );
 
-                          if (index != -1) {
-                            carrito[index]["cantidad"] += 1;
-                          } else {
-                            carrito.add({
-                              ...data,
-                              "cantidad": 1,
-                              "id_detalle_padre_temporal": data.hashCode
-                                  .toString(),
-                            });
-                          }
+                          final uniqueId =
+                              "${DateTime.now().microsecondsSinceEpoch}_${Random().nextInt(9999)}";
+
+                          carrito.add({
+                            ...data,
+                            "cantidad": 1,
+                            "id_detalle_padre_temporal": uniqueId,
+                          });
                         });
 
                         mostrarToast("$grupo agregado");
@@ -564,6 +562,22 @@ class _CartaPageState extends State<CartaPage> {
       pageBuilder: (context, animation, secondaryAnimation) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final Map<String, List<Map<String, dynamic>>> agrupados = {};
+
+            for (final item in carrito) {
+              final key =
+                  "${item["grupo"]}*${item["precio"]}*${item["porcion"]}*${item["unidad"]}*${item["nombre_cat"]}";
+
+              agrupados.putIfAbsent(key, () => []);
+              agrupados[key]!.add(item);
+            }
+
+            final carritoVisual = agrupados.values.map((items) {
+              final primero = items.first;
+
+              return {...primero, "cantidad": items.length};
+            }).toList();
+
             double subtotal = carrito.fold(
               0.0,
               (double sum, item) =>
@@ -611,9 +625,9 @@ class _CartaPageState extends State<CartaPage> {
                                 ),
                               )
                             : ListView.builder(
-                                itemCount: carrito.length,
+                                itemCount: carritoVisual.length,
                                 itemBuilder: (context, index) {
-                                  final item = carrito[index];
+                                  final item = carritoVisual[index];
                                   final esTopping =
                                       item["nombre_cat"] == "Toppings";
 
