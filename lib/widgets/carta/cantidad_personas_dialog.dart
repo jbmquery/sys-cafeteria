@@ -1,3 +1,4 @@
+//lib/widgets/carta/cantidad_personas_dialog.dart
 import 'package:flutter/material.dart';
 
 class CantidadPersonasDialog extends StatefulWidget {
