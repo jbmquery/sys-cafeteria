@@ -40,9 +40,19 @@ class _OrdenPageState extends State<OrdenPage> {
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
                       .collection('pedidos')
-                      .orderBy('fecha', descending: true)
+                      .where('estado', isEqualTo: 'abierto')
                       .snapshots(),
+
                   builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          "Error: ${snapshot.error}",
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      );
+                    }
+
                     if (!snapshot.hasData) {
                       return const Center(
                         child: CircularProgressIndicator(color: Colors.white),
@@ -50,6 +60,16 @@ class _OrdenPageState extends State<OrdenPage> {
                     }
 
                     final pedidos = snapshot.data!.docs;
+
+                    pedidos.sort((a, b) {
+                      final dataA = a.data() as Map<String, dynamic>;
+                      final dataB = b.data() as Map<String, dynamic>;
+
+                      final horaA = (dataA['hora_pedido'] ?? '').toString();
+                      final horaB = (dataB['hora_pedido'] ?? '').toString();
+
+                      return horaB.compareTo(horaA);
+                    });
 
                     if (pedidos.isEmpty) {
                       return const Center(
@@ -106,7 +126,7 @@ class _OrdenPageState extends State<OrdenPage> {
                                     // agregar producto luego
                                   },
                                   child: Container(
-                                    padding: const EdgeInsets.all(10),
+                                    padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
                                       gradient: const LinearGradient(
                                         colors: [
@@ -114,7 +134,7 @@ class _OrdenPageState extends State<OrdenPage> {
                                           Color(0xFF00A896),
                                         ],
                                       ),
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: const Icon(
                                       Icons.add,
@@ -219,7 +239,15 @@ class _OrdenPageState extends State<OrdenPage> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      "${item['nombre']} (${item['porcion']} ${item['unidad']})",
+                                                      "${item['nombre']}"
+                                                      "${((item['porcion'] ?? '').toString().isNotEmpty && (item['unidad'] ?? '').toString().isNotEmpty) ? " (${item['porcion']} ${item['unidad']})" : ""}",
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      "S/ ${item['precio']}"
+                                                      "${((item['nombre_cat'] ?? '').toString().toLowerCase() == "promos") ? " (${item['nombre_cat']})" : ""}",
                                                       style: const TextStyle(
                                                         color: Colors.white,
                                                       ),
@@ -237,7 +265,7 @@ class _OrdenPageState extends State<OrdenPage> {
                                                               const TextStyle(
                                                                 color: Colors
                                                                     .green,
-                                                                fontSize: 11,
+                                                                fontSize: 12,
                                                               ),
                                                         ),
                                                       ),
