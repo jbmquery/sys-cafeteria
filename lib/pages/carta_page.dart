@@ -510,22 +510,37 @@ class _CartaPageState extends State<CartaPage> {
       final now = DateTime.now();
       final horaFormateada = DateFormat('HH:mm:ss').format(now);
 
-      final pedidoRef = await firestore.collection('pedidos').add({
-        "nombre_mesa": nombreMesaActual,
-        "nombre_cliente": "",
-        "uid_usuario": widget.uidUsuarioAccion,
-        "fecha": Timestamp.now(),
-        "hora_pedido": horaFormateada,
-        "hora_pago": "",
-        "estado": "abierto",
-        "cantidad_clientes":
-            cantidadClientesManual ?? mesaData["capacidad"] ?? 0,
-        "observacion": "",
-        "forma_pago": "",
-        "puntos_canjeados_total": 0,
-        "monto_pagado": 0.0,
-        "monto_vuelto": 0.0,
-        "subtotal": subtotal,
+      final contadorRef = firestore.collection('contadores').doc('global');
+
+      final pedidoRef = await firestore.runTransaction((transaction) async {
+        final contadorSnap = await transaction.get(contadorRef);
+
+        final contadorActual = (contadorSnap.data()?['pedidos'] ?? 1) as int;
+
+        final nuevoPedidoRef = firestore.collection('pedidos').doc();
+
+        transaction.set(nuevoPedidoRef, {
+          "num_pedido": contadorActual,
+          "nombre_mesa": nombreMesaActual,
+          "nombre_cliente": "",
+          "uid_usuario": widget.uidUsuarioAccion,
+          "fecha": Timestamp.now(),
+          "hora_pedido": horaFormateada,
+          "hora_pago": "",
+          "estado": "abierto",
+          "cantidad_clientes":
+              cantidadClientesManual ?? mesaData["capacidad"] ?? 0,
+          "observacion": "",
+          "forma_pago": "",
+          "puntos_canjeados_total": 0,
+          "monto_pagado": 0.0,
+          "monto_vuelto": 0.0,
+          "subtotal": subtotal,
+        });
+
+        transaction.update(contadorRef, {"pedidos": contadorActual + 1});
+
+        return nuevoPedidoRef;
       });
 
       final Map<String, String> detalleIds = {};

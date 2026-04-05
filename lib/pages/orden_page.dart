@@ -112,7 +112,7 @@ class _OrdenPageState extends State<OrdenPage> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    "Para: ${data['nombre_mesa']}   Pedido: ${pedido.id}",
+                                    "${data['nombre_mesa']}   Pedido: ${data['num_pedido']}",
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,
