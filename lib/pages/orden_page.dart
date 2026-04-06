@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../widgets/app_sidebar.dart';
 import '../widgets/app_navbar.dart';
 import '../widgets/app_bottom_tabbar.dart';
+import '../widgets/orden/cuenta_pago.dart';
 
 class OrdenPage extends StatefulWidget {
   const OrdenPage({super.key});
@@ -311,8 +312,10 @@ class _OrdenPageState extends State<OrdenPage> {
                                             _actionIcon(Icons.restaurant),
                                             const SizedBox(width: 10),
                                             _actionIcon(Icons.delete_outline),
+                                            const SizedBox(width: 10),
+                                            _actionIcon(Icons.swap_horiz),
                                             const Spacer(),
-                                            _payButton(),
+                                            _payButton(pedido.id, detalles),
                                           ],
                                         ),
                                       ),
@@ -357,19 +360,46 @@ class _OrdenPageState extends State<OrdenPage> {
     );
   }
 
-  Widget _payButton() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF00C8AA), Color(0xFF00A896)],
+  Widget _payButton(String pedidoId, List<QueryDocumentSnapshot> detalles) {
+    return GestureDetector(
+      onTap: () {
+        showGeneralDialog(
+          context: context,
+          barrierDismissible: true,
+          barrierLabel: "",
+          barrierColor: Colors.black54,
+          transitionDuration: const Duration(milliseconds: 300),
+          pageBuilder: (_, __, ___) {
+            return CuentaPago(
+              pedidoId: pedidoId,
+              detalles: detalles,
+              checkedItems: checkedItems,
+            );
+          },
+          transitionBuilder: (_, animation, __, child) {
+            return SlideTransition(
+              position: Tween(
+                begin: const Offset(1, 0),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF00C8AA), Color(0xFF00A896)],
+          ),
+          borderRadius: BorderRadius.circular(12),
         ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-        child: Text(
-          "Pagar",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          child: Text(
+            "Pagar",
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );
