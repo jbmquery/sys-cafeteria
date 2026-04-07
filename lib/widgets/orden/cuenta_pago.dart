@@ -90,6 +90,43 @@ class _CuentaPagoState extends State<CuentaPago> {
     return total;
   }
 
+  Widget _tabComprobante(String label) {
+    final activo = tipoComprobante == label;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            tipoComprobante = label;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            gradient: activo
+                ? const LinearGradient(
+                    colors: [Color(0xFF00C8AA), Color(0xFF00A896)],
+                  )
+                : null,
+            color: activo ? null : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: activo ? Colors.black : Colors.white54,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final resumen = obtenerResumen();
@@ -124,43 +161,189 @@ class _CuentaPagoState extends State<CuentaPago> {
 
               const SizedBox(height: 20),
 
-              DropdownButton<String>(
-                value: tipoComprobante,
-                dropdownColor: const Color(0xFF1E293B),
-                items: const [
-                  DropdownMenuItem(value: "Boleta", child: Text("Boleta")),
-                  DropdownMenuItem(
-                    value: "Boleta Electronica",
-                    child: Text("Boleta Electronica"),
+              Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: Row(
+                      children: [
+                        _tabComprobante("Boleta"),
+                        _tabComprobante("Boleta Electronica"),
+                        _tabComprobante("Factura"),
+                      ],
+                    ),
                   ),
-                  DropdownMenuItem(value: "Factura", child: Text("Factura")),
+
+                  const SizedBox(height: 16),
+
+                  if (tipoComprobante == "Boleta Electronica" ||
+                      tipoComprobante == "Factura")
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          /// BUSCADOR CLIENTE
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.04),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.search,
+                                  color: Colors.white54,
+                                  size: 18,
+                                ),
+
+                                const SizedBox(width: 8),
+
+                                const Expanded(
+                                  child: TextField(
+                                    style: TextStyle(color: Colors.white),
+                                    decoration: InputDecoration(
+                                      hintText: "Buscar Cliente",
+                                      hintStyle: TextStyle(
+                                        color: Colors.white38,
+                                      ),
+                                      border: InputBorder.none,
+                                    ),
+                                  ),
+                                ),
+
+                                Icon(
+                                  Icons.close,
+                                  color: Colors.white.withOpacity(0.5),
+                                  size: 18,
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 15),
+
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              "+ Nuevo Cliente",
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.7),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          /// DATOS CLIENTE VISUAL
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.person_outline,
+                                color: Colors.white54,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                "Nombre:",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  "JHEFERSON SANTIAGO BLANCO MARTIN",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.badge_outlined,
+                                color: Colors.white54,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                tipoComprobante == "Factura"
+                                    ? "RUC:"
+                                    : "N° Documento:",
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  tipoComprobante == "Factura"
+                                      ? "10760452471"
+                                      : "76045247",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.location_on_outlined,
+                                color: Colors.white54,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                "Dirección:",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  "MZ K LT 17 VISTA ALEGRE - CARABAYLLO",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
-                onChanged: (v) {
-                  setState(() {
-                    tipoComprobante = v!;
-                  });
-                },
               ),
-
-              if (tipoComprobante != "Boleta") ...[
-                const SizedBox(height: 14),
-
-                TextField(
-                  controller: nombreCliente,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(hintText: "Nombre cliente"),
-                ),
-
-                const SizedBox(height: 10),
-
-                TextField(
-                  controller: documentoCliente,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: tipoComprobante == "Factura" ? "RUC" : "DNI",
-                  ),
-                ),
-              ],
 
               const SizedBox(height: 20),
 
