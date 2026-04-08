@@ -177,6 +177,38 @@ class _CuentaPagoState extends State<CuentaPago> {
     );
   }
 
+  Widget _buildResumenRow(
+    String label,
+    String value,
+    Color color, {
+    bool bold = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
+              fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: bold ? FontWeight.bold : FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final resumen = obtenerResumen();
@@ -840,36 +872,94 @@ class _CuentaPagoState extends State<CuentaPago> {
               ),
 
               /// ===== FOOTER FIJO =====
-              const SizedBox(height: 15),
+              const SizedBox(height: 12),
 
-              Text(
-                "Descuento: S/ ${totalDescuento().toStringAsFixed(2)}",
-                style: const TextStyle(color: Colors.white70),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0F172A),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.white.withOpacity(0.05)),
+                ),
+                child: Column(
+                  children: [
+                    _buildResumenRow(
+                      "Descuento",
+                      "- S/ ${totalDescuento().toStringAsFixed(2)}",
+                      const Color(0xFFFF6B6B),
+                    ),
+
+                    _buildResumenRow(
+                      "Propina",
+                      "+ S/ ${totalPropina().toStringAsFixed(2)}",
+                      const Color(0xFFFFD54F),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Divider(color: Colors.white.withOpacity(0.06), height: 8),
+
+                    _buildResumenRow(
+                      "Total Final",
+                      "S/ ${totalFinal().toStringAsFixed(2)}",
+                      Colors.white,
+                      bold: true,
+                    ),
+
+                    _buildResumenRow(
+                      "Pagado",
+                      "S/ ${totalPagado().toStringAsFixed(2)}",
+                      const Color(0xFF00E5C3),
+                    ),
+
+                    _buildResumenRow(
+                      "Vuelto",
+                      "S/ ${(totalPagado() - totalFinal()).toStringAsFixed(2)}",
+                      const Color(0xFF64B5F6),
+                    ),
+                  ],
+                ),
               ),
 
-              Text(
-                "Propina: S/ ${totalPropina().toStringAsFixed(2)}",
-                style: const TextStyle(color: Colors.white70),
+              const SizedBox(height: 14),
+
+              SizedBox(
+                width: double.infinity,
+                height: 46,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF00C8AA),
+                        Color.fromARGB(255, 1, 144, 130),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Text(
+                      "PAGAR",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        letterSpacing: 0.5,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-
-              Text(
-                "Total final: S/ ${totalFinal().toStringAsFixed(2)}",
-                style: const TextStyle(color: Colors.white),
-              ),
-
-              Text(
-                "Total pagado: S/ ${totalPagado().toStringAsFixed(2)}",
-                style: const TextStyle(color: Colors.white),
-              ),
-
-              Text(
-                "Vuelto: S/ ${(totalPagado() - totalFinal()).toStringAsFixed(2)}",
-                style: const TextStyle(color: Colors.white70),
-              ),
-
-              const SizedBox(height: 20),
-
-              ElevatedButton(onPressed: () {}, child: const Text("PAGAR")),
             ],
           ),
         ),
