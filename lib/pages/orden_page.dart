@@ -247,7 +247,7 @@ class _OrdenPageState extends State<OrdenPage> {
                                                       ),
                                                     ),
                                                     Text(
-                                                      "S/ ${item['precio']}"
+                                                      "S/ ${item['precio'].toStringAsFixed(2)}"
                                                       "${((item['nombre_cat'] ?? '').toString().toLowerCase() == "promos") ? " (${item['nombre_cat']})" : ""}",
                                                       style: const TextStyle(
                                                         color: Colors.white,
