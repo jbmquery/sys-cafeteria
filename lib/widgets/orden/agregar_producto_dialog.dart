@@ -1,3 +1,4 @@
+//lib/widgets/orden/agregar_producto_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -42,6 +43,96 @@ class _AgregarProductoDialogState extends State<AgregarProductoDialog> {
         });
 
     if (mounted) Navigator.pop(context, true);
+  }
+
+  Widget grupoCard(String grupo, List<QueryDocumentSnapshot> items) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              grupo,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+
+          Wrap(
+            spacing: 6,
+            children: items.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+
+              final porcion = (data["porcion"] ?? "").toString().trim();
+              final unidad = (data["unidad"] ?? "").toString().trim();
+
+              String texto = "+";
+
+              if (porcion.isNotEmpty && unidad.isNotEmpty) {
+                texto = "$porcion $unidad";
+              } else if (porcion.isNotEmpty) {
+                texto = porcion;
+              } else if (unidad.isNotEmpty) {
+                texto = unidad;
+              }
+
+              final disponible = data["disponibilidad"] ?? true;
+
+              return GestureDetector(
+                onTap: disponible
+                    ? () {
+                        setState(() {
+                          seleccionado = doc;
+                        });
+                      }
+                    : null,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: seleccionado?.id == doc.id
+                        ? const LinearGradient(
+                            colors: [Color(0xFF00C8AA), Color(0xFF00A896)],
+                          )
+                        : disponible
+                        ? null
+                        : const LinearGradient(
+                            colors: [
+                              Color.fromARGB(255, 243, 59, 157),
+                              Color.fromARGB(255, 200, 6, 109),
+                            ],
+                          ),
+                    color: seleccionado?.id == doc.id
+                        ? null
+                        : Colors.white.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    texto,
+                    style: TextStyle(
+                      color: seleccionado?.id == doc.id
+                          ? Colors.black
+                          : Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -130,95 +221,32 @@ class _AgregarProductoDialogState extends State<AgregarProductoDialog> {
 
                   final docs = snapshot.data!.docs.where((doc) {
                     final data = doc.data() as Map<String, dynamic>;
+
+                    final grupo = (data["grupo"] ?? "")
+                        .toString()
+                        .toLowerCase();
                     final nombre = (data["nombre"] ?? "")
                         .toString()
                         .toLowerCase();
-                    return nombre.contains(searchText);
+
+                    return grupo.contains(searchText) ||
+                        nombre.contains(searchText);
                   }).toList();
 
-                  return ListView.builder(
-                    itemCount: docs.length,
-                    itemBuilder: (context, index) {
-                      final doc = docs[index];
-                      final data = doc.data() as Map<String, dynamic>;
+                  final Map<String, List<QueryDocumentSnapshot>> agrupados = {};
 
-                      final disponible = data["disponibilidad"] ?? true;
-                      final esPromo = data["nombre_cat"] == "Promos";
+                  for (var doc in docs) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final grupo = data["grupo"] ?? "";
 
-                      return GestureDetector(
-                        onTap: disponible
-                            ? () {
-                                setState(() {
-                                  seleccionado = doc;
-                                });
-                              }
-                            : null,
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: seleccionado?.id == doc.id
-                                ? const Color(0xFF00C8AA).withOpacity(0.18)
-                                : Colors.white.withOpacity(0.04),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: seleccionado?.id == doc.id
-                                  ? const Color(0xFF00C8AA)
-                                  : Colors.transparent,
-                            ),
-                          ),
-                          child: Opacity(
-                            opacity: disponible ? 1 : 0.35,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Builder(
-                                  builder: (_) {
-                                    final porcion = (data["porcion"] ?? "")
-                                        .toString()
-                                        .trim();
-                                    final unidad = (data["unidad"] ?? "")
-                                        .toString()
-                                        .trim();
+                    agrupados.putIfAbsent(grupo, () => []);
+                    agrupados[grupo]!.add(doc);
+                  }
 
-                                    String extra = "";
-
-                                    if (porcion.isNotEmpty &&
-                                        unidad.isNotEmpty) {
-                                      extra = " ($porcion $unidad)";
-                                    } else if (porcion.isNotEmpty) {
-                                      extra = " ($porcion)";
-                                    } else if (unidad.isNotEmpty) {
-                                      extra = " ($unidad)";
-                                    }
-
-                                    return Text(
-                                      "${data["nombre"]}$extra",
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    );
-                                  },
-                                ),
-
-                                const SizedBox(height: 4),
-
-                                Text(
-                                  "${data["nombre_cat"]} - S/ ${(data["precio"] as num).toStringAsFixed(2)}",
-                                  style: TextStyle(
-                                    color: esPromo
-                                        ? Colors.greenAccent
-                                        : Colors.white70,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                  return ListView(
+                    children: agrupados.entries.map((entry) {
+                      return grupoCard(entry.key, entry.value);
+                    }).toList(),
                   );
                 },
               ),
