@@ -1,6 +1,7 @@
 //lib/widgets/orden/cuenta_pago.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'envases_dialog.dart';
 
 class CuentaPago extends StatefulWidget {
   final String pedidoId;
@@ -136,8 +137,20 @@ class _CuentaPagoState extends State<CuentaPago> {
     return total;
   }
 
+  double totalDelivery() {
+    double total = 0;
+
+    for (final a in ajustes) {
+      if (a["tipo"] == "delivery") {
+        total += double.tryParse(a["monto"].text) ?? 0;
+      }
+    }
+
+    return total;
+  }
+
   double totalFinal() {
-    return subtotal() - totalDescuento() + totalPropina();
+    return subtotal() - totalDescuento() + totalPropina() + totalDelivery();
   }
 
   Widget _tabComprobante(String label) {
@@ -487,14 +500,27 @@ class _CuentaPagoState extends State<CuentaPago> {
 
                       const SizedBox(height: 16),
 
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          "+ Agregar Envase",
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                      GestureDetector(
+                        onTap: () async {
+                          final resultado = await showDialog(
+                            context: context,
+                            builder: (_) =>
+                                EnvasesDialog(pedidoId: widget.pedidoId),
+                          );
+
+                          if (resultado == true) {
+                            setState(() {});
+                          }
+                        },
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            "+ Agregar Envase",
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
@@ -706,6 +732,8 @@ class _CuentaPagoState extends State<CuentaPago> {
                         final a = entry.value;
 
                         final esDescuento = a["tipo"] == "descuento";
+                        final esPropina = a["tipo"] == "propina";
+                        final esDelivery = a["tipo"] == "delivery";
 
                         return Container(
                           margin: const EdgeInsets.only(bottom: 12),
@@ -733,9 +761,14 @@ class _CuentaPagoState extends State<CuentaPago> {
                                               109,
                                             ),
                                           ]
-                                        : [
+                                        : esPropina
+                                        ? [
                                             const Color(0xFFFFD54F),
                                             const Color(0xFFFFB300),
+                                          ]
+                                        : [
+                                            const Color(0xFF64B5F6),
+                                            const Color(0xFF1E88E5),
                                           ],
                                   ),
                                   borderRadius: const BorderRadius.only(
@@ -746,7 +779,9 @@ class _CuentaPagoState extends State<CuentaPago> {
                                 child: Icon(
                                   esDescuento
                                       ? Icons.discount_outlined
-                                      : Icons.volunteer_activism_outlined,
+                                      : esPropina
+                                      ? Icons.volunteer_activism_outlined
+                                      : Icons.delivery_dining_outlined,
                                   color: Colors.black,
                                   size: 20,
                                 ),
@@ -773,6 +808,10 @@ class _CuentaPagoState extends State<CuentaPago> {
                                       DropdownMenuItem(
                                         value: "propina",
                                         child: Text("Propina"),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: "delivery",
+                                        child: Text("Delivery"),
                                       ),
                                     ],
                                     onChanged: (v) {
@@ -843,7 +882,7 @@ class _CuentaPagoState extends State<CuentaPago> {
                           ),
                         );
                       }),
-
+                      const SizedBox(height: 10),
                       GestureDetector(
                         onTap: () {
                           setState(() {
@@ -856,7 +895,7 @@ class _CuentaPagoState extends State<CuentaPago> {
                         child: Align(
                           alignment: Alignment.centerRight,
                           child: Text(
-                            "+ Agregar Descuento o Propina",
+                            "+ Agregar Dscto, Delivery o Propina",
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.7),
                               fontSize: 12,
@@ -882,7 +921,7 @@ class _CuentaPagoState extends State<CuentaPago> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF0F172A),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white.withOpacity(0.05)),
+                  border: Border.all(color: Colors.white.withOpacity(0.2)),
                 ),
                 child: Column(
                   children: [
@@ -898,9 +937,15 @@ class _CuentaPagoState extends State<CuentaPago> {
                       const Color(0xFFFFD54F),
                     ),
 
+                    _buildResumenRow(
+                      "Delivery",
+                      "+ S/ ${totalDelivery().toStringAsFixed(2)}",
+                      const Color(0xFF64B5F6),
+                    ),
+
                     const SizedBox(height: 6),
 
-                    Divider(color: Colors.white.withOpacity(0.06), height: 8),
+                    Divider(color: Colors.white.withOpacity(0.2), height: 8),
 
                     _buildResumenRow(
                       "Total Final",

@@ -7,6 +7,7 @@ import '../widgets/app_sidebar.dart';
 import '../widgets/app_navbar.dart';
 import '../widgets/app_bottom_tabbar.dart';
 import '../widgets/orden/cuenta_pago.dart';
+import '../widgets/orden/agregar_producto_dialog.dart';
 
 class OrdenPage extends StatefulWidget {
   const OrdenPage({super.key});
@@ -123,8 +124,17 @@ class _OrdenPageState extends State<OrdenPage> {
                                 ),
 
                                 GestureDetector(
-                                  onTap: () {
-                                    // agregar producto luego
+                                  onTap: () async {
+                                    final resultado = await showDialog(
+                                      context: context,
+                                      builder: (_) => AgregarProductoDialog(
+                                        pedidoId: pedido.id,
+                                      ),
+                                    );
+
+                                    if (resultado == true) {
+                                      setState(() {});
+                                    }
                                   },
                                   child: Container(
                                     padding: const EdgeInsets.all(8),
