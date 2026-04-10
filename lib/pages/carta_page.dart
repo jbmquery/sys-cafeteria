@@ -134,6 +134,7 @@ class _CartaPageState extends State<CartaPage> {
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('categorias')
+            .where('nivel', isEqualTo: 'primario')
             .orderBy('fecha_creacion')
             .snapshots(),
         builder: (context, snapshot) {
@@ -143,53 +144,84 @@ class _CartaPageState extends State<CartaPage> {
 
           final categorias = snapshot.data!.docs;
 
-          if (categorias.isNotEmpty && categoriaSeleccionada.isEmpty) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              final firstData = categorias.first.data() as Map<String, dynamic>;
-
-              setState(() {
-                categoriaSeleccionada = firstData['nombre_cat'] ?? '';
-              });
-            });
+          if (categorias.isEmpty) {
+            return const SizedBox(); // o puedes poner un loader si quieres
           }
 
-          return ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            itemCount: categorias.length,
-            itemBuilder: (context, index) {
-              final data = categorias[index].data() as Map<String, dynamic>;
-              final categoria = data['nombre_cat'] ?? '';
+          if (categorias.isNotEmpty && categoriaSeleccionada.isEmpty) {
+            final firstData = categorias.first.data() as Map<String, dynamic>;
+            final primeraCategoria = firstData['nombre_cat'] ?? '';
 
-              final selected = categoria == categoriaSeleccionada;
-
-              return GestureDetector(
-                onTap: () {
+            // ⚠️ SOLO setea si aún no coincide
+            if (categoriaSeleccionada != primeraCategoria) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
                   setState(() {
-                    categoriaSeleccionada = categoria;
+                    categoriaSeleccionada = primeraCategoria;
                   });
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  margin: const EdgeInsets.only(right: 10),
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                  decoration: BoxDecoration(
-                    gradient: selected
-                        ? const LinearGradient(
-                            colors: [Color(0xFF00C8AA), Color(0xFF00A896)],
-                          )
-                        : null,
-                    color: selected ? null : Colors.white.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Center(
-                    child: Text(
-                      categoria,
-                      style: TextStyle(
-                        color: selected ? Colors.black : Colors.white70,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                }
+              });
+            }
+          }
+
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(width: 14),
+
+                      ...categorias.map((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final categoria = data['nombre_cat'] ?? '';
+
+                        final selected = categoria == categoriaSeleccionada;
+
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              categoriaSeleccionada = categoria;
+                            });
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            margin: const EdgeInsets.only(right: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 18),
+                            decoration: BoxDecoration(
+                              gradient: selected
+                                  ? const LinearGradient(
+                                      colors: [
+                                        Color(0xFF00C8AA),
+                                        Color(0xFF00A896),
+                                      ],
+                                    )
+                                  : null,
+                              color: selected
+                                  ? null
+                                  : Colors.white.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Center(
+                              child: Text(
+                                categoria,
+                                style: TextStyle(
+                                  color: selected
+                                      ? Colors.black
+                                      : Colors.white70,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+
+                      const SizedBox(width: 14),
+                    ],
                   ),
                 ),
               );
