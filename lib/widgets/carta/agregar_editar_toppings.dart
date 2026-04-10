@@ -124,7 +124,7 @@ class _AgregarEditarToppingsDialogState
 
             Text(
               "$nombre ${porcion ?? ""} ${unidad ?? ""}",
-              style: const TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Color.fromARGB(255, 0, 200, 170)),
             ),
 
             const SizedBox(height: 20),
@@ -159,7 +159,7 @@ class _AgregarEditarToppingsDialogState
 
                         return GestureDetector(
                           onTap: disponible ? () => toggleTopping(doc) : null,
-                          onLongPress: disponible
+                          onDoubleTap: disponible
                               ? () => longPressTopping(doc)
                               : null,
                           child: Stack(
@@ -282,36 +282,71 @@ class _AgregarEditarToppingsDialogState
             Row(
               children: [
                 Expanded(
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Cancelar"),
+                  child: SizedBox(
+                    height: 48,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(
+                          color: Color(0xFF00C8AA),
+                          width: 1.2,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        backgroundColor: Colors.transparent,
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        "Cancelar",
+                        style: TextStyle(color: Color(0xFF00C8AA)),
+                      ),
+                    ),
                   ),
                 ),
+
+                const SizedBox(width: 10),
+
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      final toppingsFinal = <Map<String, dynamic>>[];
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF00C8AA), Color(0xFF00A896)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                      ),
+                      onPressed: () {
+                        final toppingsFinal = <Map<String, dynamic>>[];
 
-                      for (var doc in toppingsDisponibles) {
-                        final id = doc.id;
-                        final cantidad = toppingsSeleccionados[id] ?? 0;
+                        for (var doc in toppingsDisponibles) {
+                          final id = doc.id;
+                          final cantidad = toppingsSeleccionados[id] ?? 0;
 
-                        if (cantidad > 0) {
-                          final data = doc.data() as Map<String, dynamic>;
+                          if (cantidad > 0) {
+                            final data = doc.data() as Map<String, dynamic>;
 
-                          for (int i = 0; i < cantidad; i++) {
-                            toppingsFinal.add({...data, "id": id});
+                            for (int i = 0; i < cantidad; i++) {
+                              toppingsFinal.add({...data, "id": id});
+                            }
                           }
                         }
-                      }
 
-                      Navigator.pop(context, {
-                        "producto": producto,
-                        "toppings": toppingsFinal,
-                        "observacion": observacionController.text.trim(),
-                      });
-                    },
-                    child: const Text("Guardar"),
+                        Navigator.pop(context, {
+                          "producto": producto,
+                          "toppings": toppingsFinal,
+                          "observacion": observacionController.text.trim(),
+                        });
+                      },
+                      child: const Text(
+                        "Guardar",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
                   ),
                 ),
               ],
