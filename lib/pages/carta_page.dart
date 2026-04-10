@@ -946,21 +946,18 @@ class _CartaPageState extends State<CartaPage> {
                       Row(
                         children: [
                           Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF374151),
-                                    Color(0xFF1F2937),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
+                            child: SizedBox(
+                              height: 48,
+                              child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(
+                                    color: Color(0xFF00C8AA),
+                                    width: 1.2,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                   backgroundColor: Colors.transparent,
-                                  shadowColor: Colors.transparent,
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -969,7 +966,10 @@ class _CartaPageState extends State<CartaPage> {
 
                                   setDialogState(() {});
                                 },
-                                child: const Text("Cancelar"),
+                                child: const Text(
+                                  "Cancelar",
+                                  style: TextStyle(color: Color(0xFF00C8AA)),
+                                ),
                               ),
                             ),
                           ),
@@ -978,6 +978,7 @@ class _CartaPageState extends State<CartaPage> {
 
                           Expanded(
                             child: Container(
+                              height: 48,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [
@@ -985,9 +986,8 @@ class _CartaPageState extends State<CartaPage> {
                                     Color(0xFF00A896),
                                   ],
                                 ),
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
