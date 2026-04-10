@@ -27,11 +27,13 @@ class _AgregarEditarToppingsDialogState
   List<QueryDocumentSnapshot> toppingsDisponibles = [];
 
   final List<String> sugerencias = [
-    "Sin azúcar",
-    "Extra caliente",
-    "Para llevar",
-    "Sin hielo",
-    "Bajo en azúcar",
+    "Poco azucar",
+    "Sin Chantilly",
+    "Helado",
+    "Leche sin Lactosa",
+    "Poco cafe",
+    "Sin azucar",
+    "Fresco",
   ];
 
   @override
@@ -53,6 +55,7 @@ class _AgregarEditarToppingsDialogState
     final snap = await FirebaseFirestore.instance
         .collection("carta")
         .where("nombre_cat", isEqualTo: "Toppings")
+        .where("estado", isEqualTo: true) // 👈 FILTRO CLAVE
         .get();
 
     setState(() {
@@ -108,6 +111,7 @@ class _AgregarEditarToppingsDialogState
         constraints: const BoxConstraints(maxHeight: 600),
         child: Column(
           children: [
+            /// 🧱 HEADER FIJO
             const Text(
               "Agregar Toppings y Observaciones",
               style: TextStyle(
@@ -125,131 +129,156 @@ class _AgregarEditarToppingsDialogState
 
             const SizedBox(height: 20),
 
-            /// 🔥 TOPPINGS
+            /// 🥪 CONTENIDO SCROLLEABLE
             Expanded(
               child: SingleChildScrollView(
-                child: Wrap(
-                  spacing: 5,
-                  runSpacing: 5,
-                  children: toppingsDisponibles.map((doc) {
-                    final data = doc.data() as Map<String, dynamic>;
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Toppings",
+                      style: const TextStyle(color: Colors.white70),
+                    ),
 
-                    final id = doc.id;
-                    final nombre = data["nombre"] ?? "";
+                    const SizedBox(height: 20),
 
-                    final count = toppingsSeleccionados[id] ?? 0;
+                    /// 🔥 TOPPINGS
+                    Wrap(
+                      spacing: 5,
+                      runSpacing: 5,
+                      children: toppingsDisponibles.map((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
 
-                    final seleccionado = count > 0;
+                        final id = doc.id;
+                        final nombre = data["nombre"] ?? "";
 
-                    return GestureDetector(
-                      onTap: () => toggleTopping(doc),
-                      onLongPress: () => longPressTopping(doc),
-                      child: Stack(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: seleccionado
-                                  ? const Color(0xFF00C8AA)
-                                  : Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              nombre,
-                              style: TextStyle(
-                                color: seleccionado
-                                    ? Colors.black
-                                    : Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
+                        final count = toppingsSeleccionados[id] ?? 0;
+                        final seleccionado = count > 0;
 
-                          if (count > 1)
-                            Positioned(
-                              right: 0,
-                              top: 0,
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.pink,
-                                  shape: BoxShape.circle,
+                        final disponible = data["disponibilidad"] ?? true;
+
+                        return GestureDetector(
+                          onTap: disponible ? () => toggleTopping(doc) : null,
+                          onLongPress: disponible
+                              ? () => longPressTopping(doc)
+                              : null,
+                          child: Stack(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: seleccionado
+                                      ? const Color(0xFF00C8AA)
+                                      : disponible
+                                      ? Colors.white.withOpacity(0.2)
+                                      : Colors.white.withOpacity(
+                                          0.08,
+                                        ), // 👈 más tenue si no disponible
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
-                                  count.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.white,
+                                  nombre,
+                                  style: TextStyle(
+                                    color: seleccionado
+                                        ? Colors.black
+                                        : disponible
+                                        ? Colors.white
+                                        : Colors.white38, // 👈 apagado
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),
-                            ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
 
-            const SizedBox(height: 25),
-
-            Text(
-              "Observaciones y sugerencias",
-              style: const TextStyle(color: Colors.white70),
-            ),
-
-            const SizedBox(height: 20),
-
-            /// 💬 SUGERENCIAS
-            Wrap(
-              spacing: 6,
-              children: sugerencias.map((s) {
-                return GestureDetector(
-                  onTap: () => agregarSugerencia(s),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
+                              if (count > 1)
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.pink,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Text(
+                                      count.toString(),
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
                     ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      s,
+
+                    const SizedBox(height: 25),
+
+                    Text(
+                      "Observaciones y sugerencias",
                       style: const TextStyle(color: Colors.white70),
                     ),
-                  ),
-                );
-              }).toList(),
-            ),
 
-            const SizedBox(height: 10),
+                    const SizedBox(height: 20),
 
-            /// ✏️ INPUT
-            TextField(
-              controller: observacionController,
-              maxLines: 2,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: "Observaciones...",
-                hintStyle: const TextStyle(color: Colors.white54),
-                filled: true,
-                fillColor: Colors.white.withOpacity(0.05),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
+                    /// 💬 SUGERENCIAS
+                    Wrap(
+                      spacing: 5,
+                      runSpacing: 5,
+                      children: sugerencias.map((s) {
+                        return GestureDetector(
+                          onTap: () => agregarSugerencia(s),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              s,
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    /// ✏️ INPUT
+                    TextField(
+                      controller: observacionController,
+                      maxLines: 3,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: "Observaciones...",
+                        hintStyle: const TextStyle(color: Colors.white54),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.05),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+                  ],
                 ),
               ),
             ),
 
-            const SizedBox(height: 14),
+            /// 🧱 BOTONES FIJOS
+            const SizedBox(height: 10),
 
-            /// ✅ BOTONES
             Row(
               children: [
                 Expanded(
