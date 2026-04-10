@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 import '../widgets/app_sidebar.dart';
 import '../widgets/app_navbar.dart';
 import '../widgets/app_bottom_tabbar.dart';
-import '../widgets/carta/toppings_dialog.dart';
+import '../widgets/carta/agregar_editar_toppings.dart';
 import '../widgets/carta/cambiar_mesa_dialog.dart';
 import '../widgets/carta/cantidad_personas_dialog.dart';
 
@@ -361,44 +361,44 @@ class _CartaPageState extends State<CartaPage> {
               return GestureDetector(
                 onTap: disponible
                     ? () async {
-                        if (data["nombre_cat"] == "Toppings") {
-                          final resultado = await showDialog(
-                            context: context,
-                            builder: (_) =>
-                                ToppingsDialog(carrito: carrito, topping: data),
-                          );
+                        // ❌ BLOQUEAR toppings como producto independiente
+                        if (data["nombre_cat"] == "Toppings") return;
 
-                          if (resultado != null) {
-                            setState(() {
-                              carrito.add(resultado);
-                            });
+                        final resultado = await showDialog(
+                          context: context,
+                          builder: (_) =>
+                              AgregarEditarToppingsDialog(producto: data),
+                        );
 
-                            mostrarToast("$grupo agregado");
-                          }
+                        if (resultado == null) return;
 
-                          return;
-                        }
+                        final producto = resultado["producto"];
+                        final toppings = resultado["toppings"] as List;
+                        final observacion = resultado["observacion"];
+
+                        final uniqueId =
+                            "${DateTime.now().microsecondsSinceEpoch}_${Random().nextInt(9999)}";
 
                         setState(() {
-                          final index = carrito.indexWhere(
-                            (item) =>
-                                item["grupo"] == data["grupo"] &&
-                                item["precio"] == data["precio"] &&
-                                item["porcion"] == data["porcion"] &&
-                                item["unidad"] == data["unidad"],
-                          );
-
-                          final uniqueId =
-                              "${DateTime.now().microsecondsSinceEpoch}_${Random().nextInt(9999)}";
-
+                          /// 🟢 PRODUCTO PADRE
                           carrito.add({
-                            ...data,
+                            ...producto,
                             "cantidad": 1,
+                            "observacion": observacion,
                             "id_detalle_padre_temporal": uniqueId,
                           });
+
+                          /// 🟣 TOPPINGS HIJOS
+                          for (var t in toppings) {
+                            carrito.add({
+                              ...t,
+                              "cantidad": 1,
+                              "id_detalle_padre_temporal": uniqueId,
+                            });
+                          }
                         });
 
-                        mostrarToast("$grupo agregado");
+                        mostrarToast("${producto["grupo"]} agregado");
                       }
                     : null,
                 child: Container(
@@ -727,77 +727,171 @@ class _CartaPageState extends State<CartaPage> {
                                     child: Row(
                                       children: [
                                         Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                (() {
-                                                  final nombre =
-                                                      item["grupo"] ??
-                                                      item["nombre"] ??
-                                                      "";
+                                          child: GestureDetector(
+                                            onTap: () async {
+                                              if (item["nombre_cat"] ==
+                                                  "Toppings")
+                                                return;
 
-                                                  final porcion =
-                                                      item["porcion"]
-                                                          ?.toString()
-                                                          .trim() ??
-                                                      "";
-                                                  final unidad =
-                                                      item["unidad"]
-                                                          ?.toString()
-                                                          .trim() ??
-                                                      "";
+                                              final temporal =
+                                                  item["id_detalle_padre_temporal"];
 
-                                                  final detalle =
-                                                      "$porcion $unidad".trim();
+                                              final productoPadre = carrito
+                                                  .firstWhere(
+                                                    (e) =>
+                                                        e["id_detalle_padre_temporal"] ==
+                                                            temporal &&
+                                                        e["nombre_cat"] !=
+                                                            "Toppings",
+                                                  );
 
-                                                  final base =
-                                                      detalle.isNotEmpty
-                                                      ? "$nombre - $detalle"
-                                                      : nombre;
+                                              final toppings = carrito
+                                                  .where(
+                                                    (e) =>
+                                                        e["id_detalle_padre_temporal"] ==
+                                                            temporal &&
+                                                        e["nombre_cat"] ==
+                                                            "Toppings",
+                                                  )
+                                                  .toList();
 
-                                                  return esTopping
-                                                      ? "↳ $base"
-                                                      : base;
-                                                })(),
-                                                style: const TextStyle(
-                                                  color: Colors.white,
+                                              final resultado = await showDialog(
+                                                context: context,
+                                                builder: (_) =>
+                                                    AgregarEditarToppingsDialog(
+                                                      producto: productoPadre,
+                                                      toppingsIniciales:
+                                                          toppings,
+                                                      observacionInicial:
+                                                          productoPadre["observacion"] ??
+                                                          "",
+                                                    ),
+                                              );
+
+                                              if (resultado == null) return;
+
+                                              final producto =
+                                                  resultado["producto"];
+                                              final nuevosToppings =
+                                                  resultado["toppings"];
+                                              final observacion =
+                                                  resultado["observacion"];
+
+                                              setState(() {
+                                                carrito.removeWhere(
+                                                  (e) =>
+                                                      e["id_detalle_padre_temporal"] ==
+                                                      temporal,
+                                                );
+
+                                                carrito.add({
+                                                  ...producto,
+                                                  "cantidad": 1,
+                                                  "observacion": observacion,
+                                                  "id_detalle_padre_temporal":
+                                                      temporal,
+                                                });
+
+                                                for (var t in nuevosToppings) {
+                                                  carrito.add({
+                                                    ...t,
+                                                    "cantidad": 1,
+                                                    "id_detalle_padre_temporal":
+                                                        temporal,
+                                                  });
+                                                }
+                                              });
+
+                                              setDialogState(() {});
+                                            },
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  (() {
+                                                    final nombre =
+                                                        item["grupo"] ??
+                                                        item["nombre"] ??
+                                                        "";
+
+                                                    final porcion =
+                                                        item["porcion"]
+                                                            ?.toString()
+                                                            .trim() ??
+                                                        "";
+                                                    final unidad =
+                                                        item["unidad"]
+                                                            ?.toString()
+                                                            .trim() ??
+                                                        "";
+
+                                                    final detalle =
+                                                        "$porcion $unidad"
+                                                            .trim();
+
+                                                    final base =
+                                                        detalle.isNotEmpty
+                                                        ? "$nombre - $detalle"
+                                                        : nombre;
+
+                                                    return esTopping
+                                                        ? "↳ $base"
+                                                        : base;
+                                                  })(),
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                  ),
                                                 ),
-                                              ),
 
-                                              const SizedBox(height: 4),
+                                                if (!esTopping &&
+                                                    item["observacion"] !=
+                                                        null &&
+                                                    item["observacion"]
+                                                        .toString()
+                                                        .isNotEmpty)
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                          top: 4,
+                                                        ),
+                                                    child: Text(
+                                                      "Obs: ${item["observacion"]}",
+                                                      style: const TextStyle(
+                                                        color: Colors.white54,
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ),
 
-                                              Text(
-                                                "S/ ${((item["precio"] as num).toDouble()).toStringAsFixed(2)}"
-                                                " - x${item["cantidad"]}"
-                                                " - S/ ${(((item["precio"] as num).toDouble()) * item["cantidad"]).toStringAsFixed(2)}",
-                                                style: const TextStyle(
-                                                  color: Colors.white70,
+                                                const SizedBox(height: 4),
+
+                                                Text(
+                                                  "S/ ${((item["precio"] as num).toDouble()).toStringAsFixed(2)}"
+                                                  " - x${item["cantidad"]}"
+                                                  " - S/ ${(((item["precio"] as num).toDouble()) * item["cantidad"]).toStringAsFixed(2)}",
+                                                  style: const TextStyle(
+                                                    color: Colors.white70,
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
                                         ),
 
                                         GestureDetector(
                                           onTap: () {
                                             final temporal =
-                                                carrito[index]["id_detalle_padre_temporal"]
+                                                item["id_detalle_padre_temporal"]
                                                     ?.toString() ??
                                                 "";
 
                                             setState(() {
-                                              if (carrito[index]["nombre_cat"] !=
-                                                  "Toppings") {
-                                                carrito.removeWhere(
-                                                  (item) =>
-                                                      item["id_detalle_padre_temporal"] ==
-                                                      temporal,
-                                                );
-                                              } else {
-                                                carrito.removeAt(index);
-                                              }
+                                              carrito.removeWhere(
+                                                (e) =>
+                                                    e["id_detalle_padre_temporal"] ==
+                                                    temporal,
+                                              );
                                             });
 
                                             setDialogState(() {});
