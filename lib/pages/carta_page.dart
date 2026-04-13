@@ -70,15 +70,15 @@ class _CartaPageState extends State<CartaPage> {
 
               categorySection(),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 8),
 
               mesaSection(),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 8),
 
               searchSection(),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
               Expanded(child: productosSection()),
 
@@ -108,7 +108,7 @@ class _CartaPageState extends State<CartaPage> {
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w400,
               ),
             ),
           ),
@@ -130,7 +130,7 @@ class _CartaPageState extends State<CartaPage> {
 
   Widget categorySection() {
     return SizedBox(
-      height: 46,
+      height: 40,
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('categorias')
@@ -189,7 +189,7 @@ class _CartaPageState extends State<CartaPage> {
                           },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 250),
-                            margin: const EdgeInsets.only(right: 10),
+                            margin: const EdgeInsets.only(right: 8),
                             padding: const EdgeInsets.symmetric(horizontal: 18),
                             decoration: BoxDecoration(
                               gradient: selected
@@ -220,7 +220,7 @@ class _CartaPageState extends State<CartaPage> {
                         );
                       }).toList(),
 
-                      const SizedBox(width: 14),
+                      const SizedBox(width: 8),
                     ],
                   ),
                 ),
@@ -260,7 +260,7 @@ class _CartaPageState extends State<CartaPage> {
             ),
           ),
 
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
 
           Stack(
             children: [
@@ -358,7 +358,7 @@ class _CartaPageState extends State<CartaPage> {
 
   Widget productCard(String grupo, List<QueryDocumentSnapshot> items) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
@@ -375,7 +375,7 @@ class _CartaPageState extends State<CartaPage> {
           ),
 
           Wrap(
-            spacing: 6,
+            spacing: 5,
             children: items.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
 
@@ -436,8 +436,8 @@ class _CartaPageState extends State<CartaPage> {
                 child: Container(
                   constraints: const BoxConstraints(minWidth: 42),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 12,
+                    horizontal: 10,
+                    vertical: 8,
                   ),
                   decoration: BoxDecoration(
                     gradient: disponible
@@ -728,7 +728,7 @@ class _CartaPageState extends State<CartaPage> {
                       const SizedBox(height: 40),
 
                       const Text(
-                        "Carrito",
+                        "Carrito Pedido",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -736,7 +736,7 @@ class _CartaPageState extends State<CartaPage> {
                         ),
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
 
                       Expanded(
                         child: carrito.isEmpty
@@ -765,9 +765,9 @@ class _CartaPageState extends State<CartaPage> {
                                         margin: const EdgeInsets.only(
                                           bottom: 6,
                                         ),
-                                        padding: const EdgeInsets.all(14),
+                                        padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.05),
+                                          color: Colors.white.withOpacity(0.1),
                                           borderRadius: BorderRadius.circular(
                                             16,
                                           ),
@@ -834,7 +834,19 @@ class _CartaPageState extends State<CartaPage> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      "${producto["grupo"] ?? producto["nombre"]}",
+                                                      (producto["porcion"] !=
+                                                                      null &&
+                                                                  producto["porcion"]
+                                                                      .toString()
+                                                                      .isNotEmpty) ||
+                                                              (producto["unidad"] !=
+                                                                      null &&
+                                                                  producto["unidad"]
+                                                                      .toString()
+                                                                      .isNotEmpty)
+                                                          ? "${producto["grupo"] ?? producto["nombre"]} (${producto["porcion"] ?? ""} ${producto["unidad"] ?? ""})"
+                                                                .trim()
+                                                          : "${producto["grupo"] ?? producto["nombre"]}",
                                                       style: const TextStyle(
                                                         color: Colors.white,
                                                       ),
@@ -862,7 +874,7 @@ class _CartaPageState extends State<CartaPage> {
                                                         ),
                                                       ),
 
-                                                    const SizedBox(height: 4),
+                                                    const SizedBox(height: 5),
 
                                                     Text(
                                                       "S/ ${((producto["precio"] as num).toDouble()).toStringAsFixed(2)}",
@@ -917,7 +929,7 @@ class _CartaPageState extends State<CartaPage> {
                       Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
+                          color: Colors.white.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(16),
                         ),
 
@@ -967,7 +979,7 @@ class _CartaPageState extends State<CartaPage> {
                                   setDialogState(() {});
                                 },
                                 child: const Text(
-                                  "Cancelar",
+                                  "Borrar Todo",
                                   style: TextStyle(color: Color(0xFF00C8AA)),
                                 ),
                               ),
@@ -1045,14 +1057,14 @@ class _CartaPageState extends State<CartaPage> {
       final t = items.first;
 
       return Container(
-        margin: const EdgeInsets.only(bottom: 8, left: 28),
-        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 8, left: 16),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.03),
+          color: Colors.white.withOpacity(0.1),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Text(
-          "↳ ${t["nombre"]} x${items.length}",
+          "↳ ${t["nombre"]} x${items.length} = S/${(items.length * (t["precio"] as num).toDouble()).toStringAsFixed(2)}",
           style: const TextStyle(color: Colors.white70),
         ),
       );

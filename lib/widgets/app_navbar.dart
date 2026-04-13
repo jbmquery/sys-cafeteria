@@ -39,7 +39,7 @@ class AppNavbar extends StatelessWidget {
         final mostrarMenu = snapshot.data ?? false;
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 5),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
