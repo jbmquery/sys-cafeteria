@@ -90,8 +90,8 @@ class _AgregarEditarToppingsDialogState
 
     setState(() {
       observacionController.text = actual.isEmpty
-          ? "$texto, "
-          : "$actual, $texto, ";
+          ? "$texto "
+          : "$actual, $texto ";
     });
   }
 
