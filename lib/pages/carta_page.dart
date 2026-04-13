@@ -336,20 +336,58 @@ class _CartaPageState extends State<CartaPage> {
           return matchCategoria && matchSearch;
         }).toList();
 
-        final Map<String, List<QueryDocumentSnapshot>> agrupados = {};
+        final Map<String, Map<String, List<QueryDocumentSnapshot>>>
+        dataAgrupada = {};
 
         for (var doc in filtrados) {
           final data = doc.data() as Map<String, dynamic>;
-          final grupo = data['grupo'] ?? '';
 
-          agrupados.putIfAbsent(grupo, () => []);
-          agrupados[grupo]!.add(doc);
+          final subcat = (data['nombre_subcat'] ?? '').toString();
+          final grupo = (data['grupo'] ?? '').toString();
+
+          dataAgrupada.putIfAbsent(subcat, () => {});
+          dataAgrupada[subcat]!.putIfAbsent(grupo, () => []);
+          dataAgrupada[subcat]![grupo]!.add(doc);
         }
+
+        // 🔠 ordenar subcategorías
+        final subcatsOrdenadas = dataAgrupada.keys.toList()..sort();
 
         return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          children: agrupados.entries.map((entry) {
-            return productCard(entry.key, entry.value);
+          children: subcatsOrdenadas.expand((subcat) {
+            final grupos = dataAgrupada[subcat]!;
+
+            // 🔠 ordenar grupos
+            final gruposOrdenados = grupos.keys.toList()..sort();
+
+            return [
+              /// 🔹 SEPARADOR SUBCATEGORIA
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  children: [
+                    Expanded(child: Divider(color: Colors.white24)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        subcat,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: Colors.white24)),
+                  ],
+                ),
+              ),
+
+              /// 🔹 PRODUCTOS POR GRUPO
+              ...gruposOrdenados.map((grupo) {
+                return productCard(grupo, grupos[grupo]!);
+              }),
+            ];
           }).toList(),
         );
       },
