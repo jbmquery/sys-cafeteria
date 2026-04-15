@@ -7,6 +7,7 @@ import '../pages/sedes_turnos_page.dart';
 import '../pages/edit_mesas_page.dart';
 import '../pages/edit_carta_page.dart';
 import '../services/navigation_service.dart';
+import '../pages/impresora_page.dart';
 
 class AppSidebar extends StatelessWidget {
   const AppSidebar({super.key});
@@ -73,6 +74,7 @@ class AppSidebar extends StatelessWidget {
             visible("Bonos y Descuentos") ||
             visible("Asistencias") ||
             visible("Sedes y Turnos") ||
+            visible("Impresora") ||
             visible("Configuraciones");
 
         final fundadoraVisible =
@@ -189,6 +191,15 @@ class AppSidebar extends StatelessWidget {
                         context,
                         const SedesTurnosPage(),
                       );
+                    },
+                  ),
+
+                if (visible("Impresora"))
+                  menuItem(
+                    Icons.print,
+                    "Impresora",
+                    onTap: () {
+                      NavigationService.slideTo(context, const ImpresoraPage());
                     },
                   ),
                 if (visible("Configuraciones"))
