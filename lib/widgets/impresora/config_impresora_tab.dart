@@ -4,6 +4,7 @@ import '../../services/impresora/firebase_printer_service.dart';
 import '../../services/impresora/printer_service.dart';
 import 'buscar_impresora_dialog.dart';
 import 'impresion_prueba.dart';
+import 'impresion_prueba_pdf.dart';
 
 class ConfigImpresoraTab extends StatefulWidget {
   const ConfigImpresoraTab({super.key});
@@ -159,7 +160,6 @@ class _ConfigImpresoraTabState extends State<ConfigImpresoraTab> {
                           onPressed: () async {
                             try {
                               final printerService = PrinterService();
-
                               final bytes = await ImpresionPrueba.generar();
 
                               await printerService.sendBytes(
@@ -170,17 +170,36 @@ class _ConfigImpresoraTabState extends State<ConfigImpresoraTab> {
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text("Impresión de prueba enviada"),
+                                  content: Text(
+                                    "Impresión enviada correctamente",
+                                  ),
                                   backgroundColor: Colors.green,
                                 ),
                               );
                             } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Error al imprimir: $e"),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
+                              /// 🔥 FALLBACK A PDF
+                              try {
+                                final file =
+                                    await ImpresionPruebaPDF.generarPDF();
+
+                                await ImpresionPruebaPDF.mostrarPDF(file);
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "No se pudo imprimir, se generó PDF",
+                                    ),
+                                    backgroundColor: Colors.orange,
+                                  ),
+                                );
+                              } catch (pdfError) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Error total: $pdfError"),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
                             }
                           },
                           icon: const Icon(

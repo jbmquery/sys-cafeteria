@@ -25,7 +25,9 @@ dependencies:
   permission_handler: ^11.3.1
   device_info_plus: ^10.1.0
   package_info_plus: ^8.0.0
-  
+  pdf: ^3.10.8
+  printing: ^5.12.0
+
   cupertino_icons: ^1.0.8
   intl: ^0.20.2
 
