@@ -17,7 +17,7 @@ class ImpresionPruebaPDF {
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
               pw.Text(
-                "CAFETERIA APP",
+                "PLUVIA CAFE",
                 style: pw.TextStyle(
                   fontSize: 18,
                   fontWeight: pw.FontWeight.bold,
@@ -54,8 +54,8 @@ class ImpresionPruebaPDF {
 
               pw.SizedBox(height: 20),
 
-              pw.Text("Gracias por su compra ☕"),
-              pw.Text("www.tuapp.com"),
+              pw.Text("Gracias por su compra, visitanos."),
+              pw.Text("www.pluviacafe.com"),
             ],
           );
         },

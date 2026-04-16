@@ -16,6 +16,8 @@ class ConfigImpresoraTab extends StatefulWidget {
 class _ConfigImpresoraTabState extends State<ConfigImpresoraTab> {
   final FirebasePrinterService _firebaseService = FirebasePrinterService();
 
+  bool isPrinting = false;
+
   String selectedPaperSize = "58mm";
   int selectedCopies = 1;
 
@@ -156,64 +158,102 @@ class _ConfigImpresoraTabState extends State<ConfigImpresoraTab> {
                           color: Colors.white.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: ElevatedButton.icon(
-                          onPressed: () async {
-                            try {
-                              final printerService = PrinterService();
-                              final bytes = await ImpresionPrueba.generar();
+                        child: ElevatedButton(
+                          onPressed: isPrinting
+                              ? null // 🚫 bloquea mientras imprime
+                              : () async {
+                                  setState(() => isPrinting = true);
 
-                              await printerService.sendBytes(
-                                bytes: bytes,
-                                type: printerType,
-                                address: printerMac,
-                              );
+                                  try {
+                                    final printerService = PrinterService();
+                                    final bytes =
+                                        await ImpresionPrueba.generar();
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Impresión enviada correctamente",
-                                  ),
-                                  backgroundColor: Colors.green,
-                                ),
-                              );
-                            } catch (e) {
-                              /// 🔥 FALLBACK A PDF
-                              try {
-                                final file =
-                                    await ImpresionPruebaPDF.generarPDF();
+                                    await printerService.sendBytes(
+                                      bytes: bytes,
+                                      type: printerType,
+                                      address: printerMac,
+                                    );
 
-                                await ImpresionPruebaPDF.mostrarPDF(file);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          "Impresión enviada correctamente",
+                                        ),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    /// 🔥 FALLBACK A PDF
+                                    try {
+                                      final file =
+                                          await ImpresionPruebaPDF.generarPDF();
+                                      await ImpresionPruebaPDF.mostrarPDF(file);
 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      "No se pudo imprimir, se generó PDF",
-                                    ),
-                                    backgroundColor: Colors.orange,
-                                  ),
-                                );
-                              } catch (pdfError) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Error total: $pdfError"),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                          icon: const Icon(
-                            Icons.receipt_long,
-                            color: Colors.white,
-                          ),
-                          label: const Text(
-                            "Prueba",
-                            style: TextStyle(color: Colors.white),
-                          ),
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "No se pudo imprimir, se generó PDF",
+                                          ),
+                                          backgroundColor: Colors.orange,
+                                        ),
+                                      );
+                                    } catch (pdfError) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            "Error total: $pdfError",
+                                          ),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  } finally {
+                                    setState(() => isPrinting = false);
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
+                          child: isPrinting
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      "Imprimiendo...",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ],
+                                )
+                              : const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.receipt_long,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Prueba",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ],
+                                ),
                         ),
                       ),
                     ),

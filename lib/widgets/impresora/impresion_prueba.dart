@@ -13,7 +13,7 @@ class ImpresionPrueba {
 
     // Texto grande
     bytes += [29, 33, 16];
-    bytes += _text("CAFETERIA APP\n");
+    bytes += _text("PLUVIA CAFE\n");
 
     // Normal
     bytes += [29, 33, 0];
@@ -38,8 +38,8 @@ class ImpresionPrueba {
 
     bytes += _text("TOTAL: S/ 18.00\n\n");
 
-    bytes += _text("Gracias por su compra ☕\n");
-    bytes += _text("www.tuapp.com\n\n\n");
+    bytes += _text("Gracias por su compra, visitanos.\n");
+    bytes += _text("www.pluviacafe.com\n\n\n");
 
     // Corte de papel
     bytes += [29, 86, 1];
