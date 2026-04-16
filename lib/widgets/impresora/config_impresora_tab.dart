@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../services/impresora/firebase_printer_service.dart';
 import '../../services/impresora/printer_service.dart';
 import 'buscar_impresora_dialog.dart';
+import 'impresion_prueba.dart';
 
 class ConfigImpresoraTab extends StatefulWidget {
   const ConfigImpresoraTab({super.key});
@@ -77,6 +78,18 @@ class _ConfigImpresoraTabState extends State<ConfigImpresoraTab> {
     );
   }
 
+  Widget _card({required Widget child}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -86,109 +99,232 @@ class _ConfigImpresoraTabState extends State<ConfigImpresoraTab> {
     }
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// 1️⃣ Seleccionar impresora
-          const Text(
-            "1. Seleccionar impresora",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
+          /// 🔵 SELECCIONAR IMPRESORA
+          _card(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Seleccionar impresora",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
 
-          ElevatedButton(
-            onPressed: _openBuscarImpresora,
-            child: const Text("Seleccionar impresora"),
-          ),
+                const SizedBox(height: 12),
 
-          const SizedBox(height: 10),
+                Row(
+                  children: [
+                    /// 🔍 BUSCAR IMPRESORA
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color.fromARGB(255, 132, 95, 221),
+                              Color.fromARGB(255, 111, 114, 255),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: ElevatedButton.icon(
+                          onPressed: _openBuscarImpresora,
+                          icon: const Icon(Icons.print, color: Colors.black),
+                          label: const Text(
+                            "Buscar",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                          ),
+                        ),
+                      ),
+                    ),
 
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(18),
+                    const SizedBox(width: 10),
+
+                    /// 🧾 IMPRIMIR PRUEBA
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            try {
+                              final printerService = PrinterService();
+
+                              final bytes = await ImpresionPrueba.generar();
+
+                              await printerService.sendBytes(
+                                bytes: bytes,
+                                type: printerType,
+                                address: printerMac,
+                              );
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Impresión de prueba enviada"),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Error al imprimir: $e"),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
+                          icon: const Icon(
+                            Icons.receipt_long,
+                            color: Colors.white,
+                          ),
+                          label: const Text(
+                            "Prueba",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 14),
+
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.print, color: Colors.white70),
+
+                      const SizedBox(width: 12),
+
+                      Expanded(
+                        child: Text(
+                          "$printerName\n$printerMac\n$printerType",
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            child: Text(
-              "$printerName\nMAC/IP: $printerMac\nTipo: $printerType",
-              style: const TextStyle(color: Colors.white70),
+          ),
+
+          /// 🟣 CONFIGURACIÓN
+          _card(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Configuración de impresión",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                /// Tamaño papel
+                DropdownButtonFormField<String>(
+                  value: selectedPaperSize,
+                  dropdownColor: const Color(0xFF111827),
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: "Tamaño de papel",
+                    labelStyle: const TextStyle(color: Colors.white70),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.05),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: "58mm", child: Text("58mm")),
+                    DropdownMenuItem(value: "80mm", child: Text("80mm")),
+                    DropdownMenuItem(value: "104mm", child: Text("104mm")),
+                  ],
+                  onChanged: (value) {
+                    setState(() => selectedPaperSize = value!);
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                /// Copias
+                DropdownButtonFormField<int>(
+                  value: selectedCopies,
+                  dropdownColor: const Color(0xFF111827),
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: "Número de copias",
+                    labelStyle: const TextStyle(color: Colors.white70),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.05),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 1, child: Text("1 copia")),
+                    DropdownMenuItem(value: 2, child: Text("2 copias")),
+                    DropdownMenuItem(value: 3, child: Text("3 copias")),
+                    DropdownMenuItem(value: 4, child: Text("4 copias")),
+                  ],
+                  onChanged: (value) {
+                    setState(() => selectedCopies = value!);
+                  },
+                ),
+              ],
             ),
-          ),
-
-          const SizedBox(height: 25),
-
-          /// 2️⃣ Tamaño papel
-          const Text(
-            "2. Tamaño de impresión",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-
-          DropdownButtonFormField<String>(
-            value: selectedPaperSize,
-            dropdownColor: const Color(0xFF111827),
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white.withOpacity(0.05),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            items: const [
-              DropdownMenuItem(value: "58mm", child: Text("58mm")),
-              DropdownMenuItem(value: "80mm", child: Text("80mm")),
-              DropdownMenuItem(value: "104mm", child: Text("104mm")),
-            ],
-            onChanged: (value) {
-              setState(() => selectedPaperSize = value!);
-            },
-          ),
-
-          const SizedBox(height: 25),
-
-          /// 3️⃣ Copias
-          const Text(
-            "3. Número de copias",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-
-          DropdownButtonFormField<int>(
-            value: selectedCopies,
-            dropdownColor: const Color(0xFF111827),
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white.withOpacity(0.05),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            items: const [
-              DropdownMenuItem(value: 1, child: Text("1 copia")),
-              DropdownMenuItem(value: 2, child: Text("2 copias")),
-              DropdownMenuItem(value: 3, child: Text("3 copias")),
-              DropdownMenuItem(value: 4, child: Text("4 copias")),
-            ],
-            onChanged: (value) {
-              setState(() => selectedCopies = value!);
-            },
           ),
 
           const Spacer(),
 
-          /// 🔥 GUARDAR
-          SizedBox(
+          /// 🔥 BOTÓN GUARDAR
+          Container(
             width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color.fromARGB(255, 132, 95, 221),
+                  Color.fromARGB(255, 111, 114, 255),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(18),
+            ),
             child: ElevatedButton(
               onPressed: _guardar,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueGrey,
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              child: const Text("GUARDAR"),
+              child: const Text(
+                "GUARDAR CONFIGURACIÓN",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ],
