@@ -11,6 +11,9 @@ import '../widgets/app_bottom_tabbar.dart';
 import '../widgets/carta/agregar_editar_toppings.dart';
 import '../widgets/carta/cambiar_mesa_dialog.dart';
 import '../widgets/carta/cantidad_personas_dialog.dart';
+import '../services/impresora/printer_service.dart';
+import '../services/impresora/firebase_printer_service.dart';
+import '../widgets/carta/impresion_cocina.dart';
 
 class CartaPage extends StatefulWidget {
   final String nombreMesa;
@@ -45,6 +48,9 @@ class _CartaPageState extends State<CartaPage> {
   String searchText = "";
 
   List<Map<String, dynamic>> carrito = [];
+
+  bool isPrinting = false;
+
   final List<OverlayEntry> _toasts = [];
 
   final TextEditingController searchController = TextEditingController();
@@ -1043,17 +1049,74 @@ class _CartaPageState extends State<CartaPage> {
                                   backgroundColor: Colors.transparent,
                                   shadowColor: Colors.transparent,
                                 ),
-                                onPressed: () async {
-                                  await guardarPedidoConValidacion(subtotal);
+                                onPressed: isPrinting
+                                    ? null
+                                    : () async {
+                                        setState(() => isPrinting = true);
 
-                                  if (mounted) {
-                                    Navigator.pop(context);
-                                  }
-                                },
-                                child: const Text(
-                                  "Guardar",
-                                  style: TextStyle(color: Colors.black),
-                                ),
+                                        try {
+                                          await guardarPedidoConValidacion(
+                                            subtotal,
+                                          );
+
+                                          // 🔥 IMPRIMIR COCINA
+                                          try {
+                                            final printerService =
+                                                PrinterService();
+                                            final firebase =
+                                                FirebasePrinterService();
+
+                                            final config = await firebase
+                                                .checkAndInitializeDevice();
+
+                                            final bytes =
+                                                await ImpresionCocina.generar(
+                                                  mesa: "Mesa 1",
+                                                  numPedido: 14,
+                                                  hora: "14:59",
+                                                  items: carrito.map((e) {
+                                                    return {
+                                                      "nombre": e["nombre"],
+                                                      "cantidad":
+                                                          e["cantidad"] ?? 1,
+                                                      "observacion":
+                                                          e["observacion"] ??
+                                                          "",
+                                                    };
+                                                  }).toList(),
+                                                );
+
+                                            await printerService.sendBytes(
+                                              bytes: bytes,
+                                              type: config?["printer_type"],
+                                              address: config?["printer_mac"],
+                                            );
+                                          } catch (e) {
+                                            print(
+                                              "Error imprimiendo cocina: $e",
+                                            );
+                                          }
+
+                                          if (mounted) {
+                                            Navigator.pop(context);
+                                          }
+                                        } finally {
+                                          setState(() => isPrinting = false);
+                                        }
+                                      },
+                                child: isPrinting
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.black,
+                                        ),
+                                      )
+                                    : const Text(
+                                        "Guardar",
+                                        style: TextStyle(color: Colors.black),
+                                      ),
                               ),
                             ),
                           ),
