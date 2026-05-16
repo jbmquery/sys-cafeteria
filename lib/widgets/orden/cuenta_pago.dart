@@ -209,7 +209,7 @@ class _CuentaPagoState extends State<CuentaPago> {
               const SizedBox(height: 40),
 
               const Text(
-                "Cuenta de Pago",
+                "Cuenta de Pago # 1",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -690,7 +690,7 @@ class _CuentaPagoState extends State<CuentaPago> {
 
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
+                  horizontal: 6,
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
@@ -700,45 +700,176 @@ class _CuentaPagoState extends State<CuentaPago> {
                 ),
                 child: Column(
                   children: [
-                    _buildResumenRow(
-                      "Descuento",
-                      "- S/ ${totalDescuento().toStringAsFixed(2)}",
-                      const Color(0xFFFF6B6B),
+                    /// ===== DESCUENTO / PROPINA / DELIVERY =====
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            children: [
+                              const Text(
+                                "Descuento",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                "- S/ ${totalDescuento().toStringAsFixed(2)}",
+                                style: const TextStyle(
+                                  color: Color(0xFFFF6B6B),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        Expanded(
+                          child: Column(
+                            children: [
+                              const Text(
+                                "Propina",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                "+ S/ ${totalPropina().toStringAsFixed(2)}",
+                                style: const TextStyle(
+                                  color: Color(0xFFFFD54F),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        Expanded(
+                          child: Column(
+                            children: [
+                              const Text(
+                                "Delivery",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                "+ S/ ${totalDelivery().toStringAsFixed(2)}",
+                                style: const TextStyle(
+                                  color: Color(0xFF64B5F6),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
 
-                    _buildResumenRow(
-                      "Propina",
-                      "+ S/ ${totalPropina().toStringAsFixed(2)}",
-                      const Color(0xFFFFD54F),
-                    ),
+                    const SizedBox(height: 12),
 
-                    _buildResumenRow(
-                      "Delivery",
-                      "+ S/ ${totalDelivery().toStringAsFixed(2)}",
-                      const Color(0xFF64B5F6),
-                    ),
+                    Divider(color: Colors.white.withOpacity(0.2), height: 1),
 
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 12),
 
-                    Divider(color: Colors.white.withOpacity(0.2), height: 8),
+                    /// ===== TOTAL / PAGADO / VUELTO =====
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            children: [
+                              const Text(
+                                "Total Final",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
 
-                    _buildResumenRow(
-                      "Total Final",
-                      "S/ ${totalFinal().toStringAsFixed(2)}",
-                      Colors.white,
-                      bold: true,
-                    ),
+                              const SizedBox(height: 4),
 
-                    _buildResumenRow(
-                      "Pagado",
-                      "S/ ${totalPagado().toStringAsFixed(2)}",
-                      const Color(0xFF00E5C3),
-                    ),
+                              Text(
+                                "S/ ${totalFinal().toStringAsFixed(2)}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
 
-                    _buildResumenRow(
-                      "Vuelto",
-                      "S/ ${(totalPagado() - totalFinal()).toStringAsFixed(2)}",
-                      const Color(0xFF64B5F6),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              const Text(
+                                "Pagado",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                "S/ ${totalPagado().toStringAsFixed(2)}",
+                                style: const TextStyle(
+                                  color: Color(0xFF00E5C3),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        Expanded(
+                          child: Column(
+                            children: [
+                              const Text(
+                                "Vuelto",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                "S/ ${(totalPagado() - totalFinal()).toStringAsFixed(2)}",
+                                style: const TextStyle(
+                                  color: Color(0xFF64B5F6),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

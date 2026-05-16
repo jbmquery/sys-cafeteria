@@ -1,6 +1,7 @@
 //lib/widgets/orden/agregar_producto_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AgregarProductoDialog extends StatefulWidget {
   final String pedidoId;
@@ -20,27 +21,50 @@ class _AgregarProductoDialogState extends State<AgregarProductoDialog> {
     if (seleccionado == null) return;
 
     final data = seleccionado!.data() as Map<String, dynamic>;
+    final uidActual = FirebaseAuth.instance.currentUser?.uid ?? "";
 
-    await FirebaseFirestore.instance
+    final pedidoRef = FirebaseFirestore.instance
         .collection('pedidos')
-        .doc(widget.pedidoId)
-        .collection('detalle')
-        .add({
-          "nombre": data["nombre"] ?? "",
-          "precio": (data["precio"] as num).toDouble(),
-          "porcion": data["porcion"] ?? "",
-          "unidad": data["unidad"] ?? "",
-          "nombre_cat": data["nombre_cat"] ?? "",
-          "nombre_subcat": data["nombre_subcat"] ?? "",
-          "puntos": data["puntos"] ?? 0,
-          "abreviado": data["abreviado"] ?? "",
-          "observacion": "",
-          "es_canjeable": true,
-          "estado": "pendiente",
-          "canjeado_por": "",
-          "cuenta": 0,
-          "id_detalle_padre": "",
-        });
+        .doc(widget.pedidoId);
+
+    /// 🔹 AGREGAR PRODUCTO AL DETALLE
+    await pedidoRef.collection('detalle').add({
+      "nombre": data["nombre"] ?? data["grupo"] ?? "",
+      "precio": (data["precio"] as num).toDouble(),
+      "porcion": data["porcion"] ?? "",
+      "unidad": data["unidad"] ?? "",
+      "nombre_cat": data["nombre_cat"] ?? "",
+      "nombre_subcat": data["nombre_subcat"] ?? "",
+      "puntos": data["puntos"] ?? 0,
+      "abreviado": data["abreviado"] ?? "",
+      "observacion": "",
+      "es_canjeable": true,
+      "estado": "pendiente",
+      "canjeado_por": "",
+      "cuenta": 0,
+      "id_detalle_padre": "",
+      "grupo": data["grupo"] ?? "",
+      "uid_usuario": uidActual,
+      "codigo_barra": "",
+      "vence": "",
+    });
+
+    /// 🔹 ESPERAR UN MICRO MOMENTO PARA ASEGURAR SINCRONIZACIÓN
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    /// 🔹 OBTENER TODOS LOS DETALLES ACTUALES
+    final detalleSnapshot = await pedidoRef.collection('detalle').get();
+
+    double nuevoSubtotal = 0;
+
+    for (final doc in detalleSnapshot.docs) {
+      final item = doc.data();
+
+      nuevoSubtotal += ((item["precio"] ?? 0) as num).toDouble();
+    }
+
+    /// 🔹 ACTUALIZAR SUBTOTAL EN PEDIDO
+    await pedidoRef.update({"monto_subtotal": nuevoSubtotal});
 
     if (mounted) Navigator.pop(context, true);
   }

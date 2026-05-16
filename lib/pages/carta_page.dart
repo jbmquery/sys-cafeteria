@@ -596,22 +596,24 @@ class _CartaPageState extends State<CartaPage> {
         final nuevoPedidoRef = firestore.collection('pedidos').doc();
 
         transaction.set(nuevoPedidoRef, {
-          "num_pedido": contadorActual,
-          "nombre_mesa": nombreMesaActual,
-          "nombre_cliente": "",
-          "uid_usuario": widget.uidUsuarioAccion,
-          "fecha": Timestamp.now(),
-          "hora_pedido": horaFormateada,
-          "hora_pago": "",
-          "estado": "abierto",
           "cantidad_clientes":
               cantidadClientesManual ?? mesaData["capacidad"] ?? 0,
-          "observacion": "",
-          "forma_pago": "",
-          "puntos_canjeados_total": 0,
+          "estado": "abierto",
+          "fecha": Timestamp.now(),
+          "hora_pedido": horaFormateada,
+          "monto_delivery": 0.0,
+          "monto_descuento": 0.0,
+          "monto_subtotal": subtotal,
           "monto_pagado": 0.0,
+          "monto_propina": 0.0,
           "monto_vuelto": 0.0,
-          "subtotal": subtotal,
+          "num_pedido": contadorActual,
+          "uid_usuario": widget.uidUsuarioAccion,
+          "nombre_mesa": nombreMesaActual,
+          "tipo_mesa": mesaData["tipo_mesa"] ?? "",
+          "id_cliente": "",
+          "nombre_cliente": "",
+          "puntos_canjeados_total": 0,
         });
 
         transaction.update(contadorRef, {"pedidos": contadorActual + 1});
@@ -639,12 +641,16 @@ class _CartaPageState extends State<CartaPage> {
             "nombre_subcat": item["nombre_subcat"] ?? "",
             "puntos": item["puntos"] ?? 0,
             "abreviado": item["abreviado"] ?? "",
-            "observacion": "",
+            "observacion": item["observacion"] ?? "",
             "es_canjeable": true,
             "estado": "pendiente",
             "canjeado_por": "",
             "cuenta": 0,
             "id_detalle_padre": "",
+            "grupo": item["grupo"] ?? "",
+            "uid_usuario": widget.uidUsuarioAccion,
+            "codigo_barra": "",
+            "vence": "",
           });
 
           final temporal = item["id_detalle_padre_temporal"]?.toString() ?? "";
