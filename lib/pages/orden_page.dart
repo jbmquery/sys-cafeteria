@@ -42,7 +42,7 @@ class _OrdenPageState extends State<OrdenPage> {
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
                       .collection('pedidos')
-                      .where('estado', isEqualTo: 'abierto')
+                      .where('estado', whereIn: ['abierto', 'inconcluso'])
                       .snapshots(),
 
                   builder: (context, snapshot) {
@@ -189,7 +189,14 @@ class _OrdenPageState extends State<OrdenPage> {
                                     );
                                   }
 
-                                  final detalles = detalleSnapshot.data!.docs;
+                                  final detalles = detalleSnapshot.data!.docs
+                                      .where((d) {
+                                        final data =
+                                            d.data() as Map<String, dynamic>;
+
+                                        return data['estado'] == 'pendiente';
+                                      })
+                                      .toList();
 
                                   final productosPadre = detalles.where((d) {
                                     final x = d.data() as Map<String, dynamic>;

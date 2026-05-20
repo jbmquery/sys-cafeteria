@@ -20,6 +20,9 @@ class CuentaPago extends StatefulWidget {
 }
 
 class _CuentaPagoState extends State<CuentaPago> {
+  int numeroCuentaActual = 1;
+  bool cargandoPago = false;
+
   String tipoComprobante = "Boleta";
 
   List<Map<String, dynamic>> pagos = [
@@ -88,6 +91,188 @@ class _CuentaPagoState extends State<CuentaPago> {
         "cantidad": items.length,
       };
     }).toList();
+  }
+
+  List<QueryDocumentSnapshot> obtenerDetallesAPagar() {
+    final padres = widget.detalles.where((d) {
+      final x = d.data() as Map<String, dynamic>;
+
+      return (x['id_detalle_padre'] ?? '') == '';
+    }).toList();
+
+    final seleccionados = padres.where((d) {
+      return widget.checkedItems[d.id] == true;
+    }).toList();
+
+    final usarTodos =
+        seleccionados.isEmpty || seleccionados.length == padres.length;
+
+    final basePadres = usarTodos ? padres : seleccionados;
+
+    final idsPadres = basePadres.map((e) => e.id).toSet();
+
+    final relacionados = widget.detalles.where((d) {
+      final x = d.data() as Map<String, dynamic>;
+
+      final idPadre = x['id_detalle_padre'] ?? '';
+
+      return idsPadres.contains(idPadre);
+    }).toList();
+
+    final todos = [...basePadres, ...relacionados];
+
+    return todos.where((d) {
+      final x = d.data() as Map<String, dynamic>;
+
+      return x['estado'] != 'pagado';
+    }).toList();
+  }
+
+  String calcularEstadoPedido(
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> detalles,
+  ) {
+    final estados = detalles
+        .map((e) => (e.data()['estado'] ?? '').toString())
+        .toList();
+
+    final todosPagados = estados.every((e) => e == 'pagado');
+
+    if (todosPagados) {
+      return 'completado';
+    }
+
+    final todosCanceladosOPerdida = estados.every(
+      (e) => e == 'cancelado' || e == 'perdida',
+    );
+
+    if (todosCanceladosOPerdida) {
+      return 'cancelado';
+    }
+
+    final tienePagados = estados.any((e) => e == 'pagado');
+
+    final tieneCanceladosOPerdida = estados.any(
+      (e) => e == 'cancelado' || e == 'perdida',
+    );
+
+    if (tienePagados && tieneCanceladosOPerdida) {
+      return 'inconcluso';
+    }
+
+    return 'abierto';
+  }
+
+  Future<void> realizarPago() async {
+    if (cargandoPago) return;
+
+    final total = totalFinal();
+    final pagado = totalPagado();
+
+    if (pagado < total) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('El monto pagado es menor al total.')),
+      );
+
+      return;
+    }
+
+    setState(() {
+      cargandoPago = true;
+    });
+
+    try {
+      final firestore = FirebaseFirestore.instance;
+
+      final pedidoRef = firestore.collection('pedidos').doc(widget.pedidoId);
+
+      final detallesAPagar = obtenerDetallesAPagar();
+
+      final batch = firestore.batch();
+
+      /// ===============================
+      /// CREAR PAGOS
+      /// ===============================
+
+      for (final p in pagos) {
+        final monto = double.tryParse(p["monto"].text) ?? 0;
+
+        if (monto <= 0) continue;
+
+        final pagoRef = pedidoRef.collection('pagos').doc();
+
+        batch.set(pagoRef, {
+          'modo_pago': p["tipo"],
+          'hora_pago': Timestamp.now(),
+          'monto': monto,
+          'cuenta': numeroCuentaActual,
+        });
+      }
+
+      /// ===============================
+      /// ACTUALIZAR DETALLES
+      /// ===============================
+
+      for (final detalle in detallesAPagar) {
+        final detalleRef = pedidoRef.collection('detalle').doc(detalle.id);
+
+        batch.update(detalleRef, {
+          'estado': 'pagado',
+          'cuenta': numeroCuentaActual,
+        });
+      }
+
+      /// ===============================
+      /// OBTENER TODOS LOS DETALLES
+      /// ===============================
+
+      final detallesSnapshot = await pedidoRef.collection('detalle').get();
+
+      final nuevoEstadoPedido = calcularEstadoPedido(detallesSnapshot.docs);
+
+      /// ===============================
+      /// ACTUALIZAR PEDIDO
+      /// ===============================
+
+      batch.update(pedidoRef, {
+        'monto_delivery': totalDelivery(),
+        'monto_descuento': totalDescuento(),
+        'monto_pagado': totalPagado(),
+        'monto_propina': totalPropina(),
+        'monto_subtotal': totalFinal(),
+        'monto_vuelto': totalPagado() - totalFinal(),
+        'estado': nuevoEstadoPedido,
+      });
+
+      /// ===============================
+      /// COMMIT
+      /// ===============================
+
+      await batch.commit();
+
+      /// ===============================
+      /// ACTUALIZAR SIGUIENTE CUENTA
+      /// ===============================
+
+      numeroCuentaActual++;
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Pago realizado correctamente')),
+        );
+
+        setState(() {});
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al realizar pago: $e')));
+    } finally {
+      if (mounted) {
+        setState(() {
+          cargandoPago = false;
+        });
+      }
+    }
   }
 
   double subtotal() {
@@ -185,6 +370,44 @@ class _CuentaPagoState extends State<CuentaPago> {
     );
   }
 
+  Future<void> obtenerNumeroCuenta() async {
+    final pagosSnapshot = await FirebaseFirestore.instance
+        .collection('pedidos')
+        .doc(widget.pedidoId)
+        .collection('pagos')
+        .get();
+
+    if (pagosSnapshot.docs.isEmpty) {
+      numeroCuentaActual = 1;
+      return;
+    }
+
+    int maxCuenta = 0;
+
+    for (final doc in pagosSnapshot.docs) {
+      final data = doc.data();
+
+      final cuenta = (data['cuenta'] ?? 0) as int;
+
+      if (cuenta > maxCuenta) {
+        maxCuenta = cuenta;
+      }
+    }
+
+    numeroCuentaActual = maxCuenta + 1;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    obtenerNumeroCuenta().then((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final resumen = obtenerResumen();
@@ -208,8 +431,8 @@ class _CuentaPagoState extends State<CuentaPago> {
             children: [
               const SizedBox(height: 40),
 
-              const Text(
-                "Cuenta de Pago # 1",
+              Text(
+                "Cuenta de Pago # $numeroCuentaActual",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -891,7 +1114,7 @@ class _CuentaPagoState extends State<CuentaPago> {
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: cargandoPago ? null : realizarPago,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
@@ -899,15 +1122,24 @@ class _CuentaPagoState extends State<CuentaPago> {
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    child: const Text(
-                      "PAGAR",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        letterSpacing: 0.5,
-                        color: Colors.black,
-                      ),
-                    ),
+                    child: cargandoPago
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.black,
+                            ),
+                          )
+                        : const Text(
+                            "PAGAR",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              letterSpacing: 0.5,
+                              color: Colors.black,
+                            ),
+                          ),
                   ),
                 ),
               ),
