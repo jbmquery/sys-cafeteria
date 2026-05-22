@@ -128,19 +128,19 @@ class _CuentaPagoState extends State<CuentaPago> {
     }).toList();
   }
 
-  String calcularEstadoPedido(
-    List<QueryDocumentSnapshot<Map<String, dynamic>>> detalles,
-  ) {
+  String calcularEstadoPedidoLocal(List<Map<String, dynamic>> detalles) {
     final estados = detalles
-        .map((e) => (e.data()['estado'] ?? '').toString())
+        .map((e) => (e['estado'] ?? '').toString())
         .toList();
 
+    /// ===== COMPLETADO =====
     final todosPagados = estados.every((e) => e == 'pagado');
 
     if (todosPagados) {
       return 'completado';
     }
 
+    /// ===== CANCELADO =====
     final todosCanceladosOPerdida = estados.every(
       (e) => e == 'cancelado' || e == 'perdida',
     );
@@ -149,6 +149,7 @@ class _CuentaPagoState extends State<CuentaPago> {
       return 'cancelado';
     }
 
+    /// ===== INCONCLUSO =====
     final tienePagados = estados.any((e) => e == 'pagado');
 
     final tieneCanceladosOPerdida = estados.any(
@@ -159,6 +160,7 @@ class _CuentaPagoState extends State<CuentaPago> {
       return 'inconcluso';
     }
 
+    /// ===== ABIERTO =====
     return 'abierto';
   }
 
@@ -203,8 +205,14 @@ class _CuentaPagoState extends State<CuentaPago> {
         batch.set(pagoRef, {
           'modo_pago': p["tipo"],
           'hora_pago': Timestamp.now(),
-          'monto': monto,
+          'monto': monto, //evaluacion
           'cuenta': numeroCuentaActual,
+          'monto_delivery': totalDelivery(),
+          'monto_descuento': totalDescuento(),
+          'monto_pagado': monto,
+          'monto_propina': totalPropina(),
+          'monto_subtotal': totalFinal(),
+          'monto_vuelto': totalPagado() - totalFinal(),
         });
       }
 
@@ -222,26 +230,27 @@ class _CuentaPagoState extends State<CuentaPago> {
       }
 
       /// ===============================
-      /// OBTENER TODOS LOS DETALLES
+      /// SIMULAR NUEVOS ESTADOS EN MEMORIA
       /// ===============================
 
-      final detallesSnapshot = await pedidoRef.collection('detalle').get();
+      final todosLosDetalles = widget.detalles.map((d) {
+        final data = Map<String, dynamic>.from(
+          d.data() as Map<String, dynamic>,
+        );
 
-      final nuevoEstadoPedido = calcularEstadoPedido(detallesSnapshot.docs);
+        /// si este detalle está dentro de los que se pagarán
+        final seraPagado = detallesAPagar.any((x) => x.id == d.id);
 
-      /// ===============================
-      /// ACTUALIZAR PEDIDO
-      /// ===============================
+        if (seraPagado) {
+          data['estado'] = 'pagado';
+        }
 
-      batch.update(pedidoRef, {
-        'monto_delivery': totalDelivery(),
-        'monto_descuento': totalDescuento(),
-        'monto_pagado': totalPagado(),
-        'monto_propina': totalPropina(),
-        'monto_subtotal': totalFinal(),
-        'monto_vuelto': totalPagado() - totalFinal(),
-        'estado': nuevoEstadoPedido,
-      });
+        return data;
+      }).toList();
+
+      final nuevoEstadoPedido = calcularEstadoPedidoLocal(todosLosDetalles);
+
+      batch.update(pedidoRef, {'estado': nuevoEstadoPedido});
 
       /// ===============================
       /// COMMIT
