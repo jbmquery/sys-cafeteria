@@ -202,10 +202,12 @@ class _CuentaPagoState extends State<CuentaPago> {
 
         final pagoRef = pedidoRef.collection('pagos').doc();
 
+        final montoCuenta = montoProductosSeleccionados();
+
         batch.set(pagoRef, {
           'modo_pago': p["tipo"],
           'hora_pago': Timestamp.now(),
-          'monto': monto, //evaluacion
+          'monto': montoCuenta,
           'cuenta': numeroCuentaActual,
           'monto_delivery': totalDelivery(),
           'monto_descuento': totalDescuento(),
@@ -282,6 +284,20 @@ class _CuentaPagoState extends State<CuentaPago> {
         });
       }
     }
+  }
+
+  double montoProductosSeleccionados() {
+    final detallesAPagar = obtenerDetallesAPagar();
+
+    double total = 0;
+
+    for (final detalle in detallesAPagar) {
+      final data = detalle.data() as Map<String, dynamic>;
+
+      total += (data['precio'] as num?)?.toDouble() ?? 0;
+    }
+
+    return total;
   }
 
   double subtotal() {
