@@ -16,6 +16,7 @@ class _EditarUsuarioDialogState extends State<EditarUsuarioDialog> {
   final nombresController = TextEditingController();
   final apePaternoController = TextEditingController();
   final apeMaternoController = TextEditingController();
+  final apodoController = TextEditingController();
   final correoController = TextEditingController();
   final numDocumentoController = TextEditingController();
   final celularController = TextEditingController();
@@ -45,6 +46,7 @@ class _EditarUsuarioDialogState extends State<EditarUsuarioDialog> {
     nombresController.text = data['nombres'] ?? '';
     apePaternoController.text = data['ape_paterno'] ?? '';
     apeMaternoController.text = data['ape_materno'] ?? '';
+    apodoController.text = data['apodo'] ?? '';
     correoController.text = data['correo'] ?? '';
     numDocumentoController.text = data['num_documento'] ?? '';
     celularController.text = data['celular'] ?? '';
@@ -203,6 +205,16 @@ class _EditarUsuarioDialogState extends State<EditarUsuarioDialog> {
                 controller: apeMaternoController,
                 hint: "Apellido materno",
                 icon: Icons.person_outline,
+                enabled: !protegido,
+                borderColor: const Color.fromARGB(255, 111, 114, 255),
+              ),
+
+              const SizedBox(height: 12),
+
+              CustomTextField(
+                controller: apodoController,
+                hint: "Apodo",
+                icon: Icons.person_outline_rounded,
                 enabled: !protegido,
                 borderColor: const Color.fromARGB(255, 111, 114, 255),
               ),

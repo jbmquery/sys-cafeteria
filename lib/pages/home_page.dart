@@ -35,8 +35,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       drawer: const AppSidebar(),
-
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(

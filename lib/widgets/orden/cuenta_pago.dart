@@ -187,6 +187,16 @@ class _CuentaPagoState extends State<CuentaPago> {
 
       final pedidoRef = firestore.collection('pedidos').doc(widget.pedidoId);
 
+      /// ===============================
+      /// OBTENER DATOS DEL PEDIDO
+      /// ===============================
+
+      final pedidoSnapshot = await pedidoRef.get();
+
+      final pedidoData = pedidoSnapshot.data() ?? {};
+
+      final nombreMesa = pedidoData['nombre_mesa'];
+
       final detallesAPagar = obtenerDetallesAPagar();
 
       final batch = firestore.batch();
@@ -255,6 +265,24 @@ class _CuentaPagoState extends State<CuentaPago> {
       batch.update(pedidoRef, {'estado': nuevoEstadoPedido});
 
       /// ===============================
+      /// LIBERAR MESA
+      /// ===============================
+
+      if (nuevoEstadoPedido == 'completado') {
+        final mesaQuery = await firestore
+            .collection('mesas')
+            .where('nombre_mesa', isEqualTo: nombreMesa)
+            .limit(1)
+            .get();
+
+        if (mesaQuery.docs.isNotEmpty) {
+          final mesaRef = mesaQuery.docs.first.reference;
+
+          batch.update(mesaRef, {'disponibilidad': true});
+        }
+      }
+
+      /// ===============================
       /// COMMIT
       /// ===============================
 
@@ -272,6 +300,7 @@ class _CuentaPagoState extends State<CuentaPago> {
         );
 
         setState(() {});
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
       ScaffoldMessenger.of(

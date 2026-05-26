@@ -22,6 +22,7 @@ class _EditCartaPageState extends State<EditCartaPage> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         drawer: const AppSidebar(),
         body: Container(
           decoration: const BoxDecoration(

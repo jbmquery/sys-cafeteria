@@ -22,6 +22,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         drawer: const AppSidebar(),
 
         body: Container(

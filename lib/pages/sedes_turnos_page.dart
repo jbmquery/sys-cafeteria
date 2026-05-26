@@ -20,6 +20,7 @@ class _SedesTurnosPageState extends State<SedesTurnosPage> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         drawer: const AppSidebar(),
         body: Container(
           decoration: const BoxDecoration(

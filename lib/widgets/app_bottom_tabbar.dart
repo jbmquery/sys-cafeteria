@@ -1,7 +1,7 @@
 //lib/widgets/app_bottom_tabbar.dart
 import 'package:flutter/material.dart';
 import '../pages/home_page.dart';
-import '../pages/caja_page.dart';
+import '../pages/ventas_page.dart';
 import '../services/navigation_service.dart';
 import '../pages/orden_page.dart';
 
@@ -20,7 +20,7 @@ class AppBottomTabBar extends StatelessWidget {
     final items = [
       {"icon": Icons.table_restaurant, "label": "Mesas"},
       {"icon": Icons.receipt_long, "label": "Orden"},
-      {"icon": Icons.point_of_sale, "label": "Caja"},
+      {"icon": Icons.point_of_sale, "label": "Ventas"},
     ];
 
     return Container(
@@ -49,7 +49,7 @@ class AppBottomTabBar extends StatelessWidget {
               } else if (index == 1) {
                 destino = const OrdenPage();
               } else {
-                destino = const CajaPage();
+                destino = const VentasPage();
               }
 
               NavigationService.slideReplace(context, destino);

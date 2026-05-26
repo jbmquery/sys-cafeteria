@@ -58,6 +58,7 @@ class _CartaPageState extends State<CartaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       drawer: const AppSidebar(),
       body: Container(
         decoration: const BoxDecoration(
