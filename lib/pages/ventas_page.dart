@@ -310,20 +310,85 @@ class _VentasPageState extends State<VentasPage> {
                                                                 dynamic
                                                               >;
 
-                                                      return Padding(
-                                                        padding:
-                                                            const EdgeInsets.only(
-                                                              bottom: 6,
-                                                            ),
-                                                        child: Text(
-                                                          "($nombreUsuario) ${item['nombre']}",
-                                                          style:
-                                                              const TextStyle(
-                                                                color: Colors
-                                                                    .white70,
-                                                                fontSize: 12,
+                                                      final uidDetalle =
+                                                          (item['uid_usuario'] ??
+                                                                  '')
+                                                              .toString();
+
+                                                      final mismoUsuario =
+                                                          uidDetalle ==
+                                                          uidUsuario;
+
+                                                      final precio =
+                                                          (item['precio'] ?? 0)
+                                                              .toDouble();
+
+                                                      return FutureBuilder<
+                                                        String
+                                                      >(
+                                                        future: mismoUsuario
+                                                            ? Future.value('')
+                                                            : obtenerNombreUsuario(
+                                                                uidDetalle,
                                                               ),
-                                                        ),
+
+                                                        builder:
+                                                            (
+                                                              context,
+                                                              detalleUsuarioSnapshot,
+                                                            ) {
+                                                              final nombreDetalle =
+                                                                  detalleUsuarioSnapshot
+                                                                      .data ??
+                                                                  '';
+
+                                                              return Padding(
+                                                                padding:
+                                                                    const EdgeInsets.only(
+                                                                      bottom: 6,
+                                                                    ),
+
+                                                                child: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .spaceBetween,
+
+                                                                  children: [
+                                                                    Expanded(
+                                                                      child: Text(
+                                                                        mismoUsuario
+                                                                            ? "${item['nombre']}"
+                                                                            : "($nombreDetalle) ${item['nombre']}",
+
+                                                                        style: const TextStyle(
+                                                                          color:
+                                                                              Colors.white70,
+                                                                          fontSize:
+                                                                              12,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+
+                                                                    const SizedBox(
+                                                                      width: 10,
+                                                                    ),
+
+                                                                    Text(
+                                                                      "S/ ${precio.toStringAsFixed(2)}",
+
+                                                                      style: const TextStyle(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontSize:
+                                                                            12,
+                                                                        fontWeight:
+                                                                            FontWeight.w600,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              );
+                                                            },
                                                       );
                                                     }),
 

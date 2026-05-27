@@ -1,6 +1,7 @@
 //lib/widgets/orden/cuenta_pago.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'envases_dialog.dart';
 
 class CuentaPago extends StatefulWidget {
@@ -24,6 +25,7 @@ class _CuentaPagoState extends State<CuentaPago> {
   bool cargandoPago = false;
 
   String tipoComprobante = "Boleta";
+  String modoVuelto = "efectivo";
 
   List<Map<String, dynamic>> pagos = [
     {"tipo": "efectivo", "monto": TextEditingController()},
@@ -184,7 +186,7 @@ class _CuentaPagoState extends State<CuentaPago> {
 
     try {
       final firestore = FirebaseFirestore.instance;
-
+      final uidUsuarioActual = FirebaseAuth.instance.currentUser?.uid ?? '';
       final pedidoRef = firestore.collection('pedidos').doc(widget.pedidoId);
 
       /// ===============================
@@ -216,6 +218,8 @@ class _CuentaPagoState extends State<CuentaPago> {
 
         batch.set(pagoRef, {
           'modo_pago': p["tipo"],
+          'modo_vuelto': modoVuelto,
+          'uid_usuario': uidUsuarioActual,
           'hora_pago': Timestamp.now(),
           'monto': montoCuenta,
           'cuenta': numeroCuentaActual,
@@ -954,6 +958,52 @@ class _CuentaPagoState extends State<CuentaPago> {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1E293B),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: DropdownButton<String>(
+                          value: modoVuelto,
+                          isExpanded: true,
+                          underline: const SizedBox(),
+                          dropdownColor: const Color(0xFF1E293B),
+                          style: const TextStyle(color: Colors.white),
+                          iconEnabledColor: Colors.white70,
+
+                          items: const [
+                            DropdownMenuItem(
+                              value: "efectivo",
+                              child: Text("Vuelto en Efectivo"),
+                            ),
+                            DropdownMenuItem(
+                              value: "yape",
+                              child: Text("Vuelto en Yape"),
+                            ),
+                            DropdownMenuItem(
+                              value: "plin",
+                              child: Text("Vuelto en Plin"),
+                            ),
+                            DropdownMenuItem(
+                              value: "agora",
+                              child: Text("Vuelto en Agora"),
+                            ),
+                            DropdownMenuItem(
+                              value: "transferencia",
+                              child: Text("Vuelto en Transferencia"),
+                            ),
+                          ],
+
+                          onChanged: (value) {
+                            setState(() {
+                              modoVuelto = value!;
+                            });
+                          },
                         ),
                       ),
                       const SizedBox(height: 30),
