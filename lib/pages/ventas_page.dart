@@ -253,22 +253,22 @@ class _VentasPageState extends State<VentasPage> {
                                             builder: (context, pagoSnapshot) {
                                               double subtotal = 0;
 
-                                              if (pagoSnapshot.hasData) {
-                                                for (final pago
-                                                    in pagoSnapshot
-                                                        .data!
-                                                        .docs) {
-                                                  final pagoData =
-                                                      pago.data()
-                                                          as Map<
-                                                            String,
-                                                            dynamic
-                                                          >;
+                                              if (pagoSnapshot.hasData &&
+                                                  pagoSnapshot
+                                                      .data!
+                                                      .docs
+                                                      .isNotEmpty) {
+                                                final primerPago =
+                                                    pagoSnapshot
+                                                            .data!
+                                                            .docs
+                                                            .first
+                                                            .data()
+                                                        as Map<String, dynamic>;
 
-                                                  subtotal +=
-                                                      (pagoData['monto'] ?? 0)
-                                                          .toDouble();
-                                                }
+                                                subtotal =
+                                                    (primerPago['monto'] ?? 0)
+                                                        .toDouble();
                                               }
 
                                               return Container(
@@ -405,11 +405,15 @@ class _VentasPageState extends State<VentasPage> {
                                                         style: const TextStyle(
                                                           color: Colors
                                                               .greenAccent,
+                                                          fontSize: 12,
                                                           fontWeight:
                                                               FontWeight.bold,
                                                         ),
                                                       ),
                                                     ),
+                                                    const SizedBox(height: 10),
+
+                                                    /// ===== BLOQUE PAGOS + RESUMEN =====
                                                   ],
                                                 ),
                                               );
