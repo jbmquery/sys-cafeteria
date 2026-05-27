@@ -397,23 +397,358 @@ class _VentasPageState extends State<VentasPage> {
                                                           .withOpacity(0.1),
                                                     ),
 
-                                                    Align(
-                                                      alignment:
-                                                          Alignment.centerRight,
-                                                      child: Text(
-                                                        "Subtotal: S/ ${subtotal.toStringAsFixed(2)}",
-                                                        style: const TextStyle(
-                                                          color: Colors
-                                                              .greenAccent,
-                                                          fontSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 10),
+                                                    if (pagoSnapshot.hasData &&
+                                                        pagoSnapshot
+                                                            .data!
+                                                            .docs
+                                                            .isNotEmpty)
+                                                      (() {
+                                                        final pagos =
+                                                            pagoSnapshot
+                                                                .data!
+                                                                .docs;
 
-                                                    /// ===== BLOQUE PAGOS + RESUMEN =====
+                                                        /// ===== PRIMER PAGO =====
+                                                        /// Usamos solo el primero para evitar duplicados
+                                                        final primerPago =
+                                                            pagos.first.data()
+                                                                as Map<
+                                                                  String,
+                                                                  dynamic
+                                                                >;
+
+                                                        final subtotalCuenta =
+                                                            (primerPago['monto'] ??
+                                                                    0)
+                                                                .toDouble();
+
+                                                        final montoPropina =
+                                                            (primerPago['monto_propina'] ??
+                                                                    0)
+                                                                .toDouble();
+
+                                                        final montoDelivery =
+                                                            (primerPago['monto_delivery'] ??
+                                                                    0)
+                                                                .toDouble();
+
+                                                        final montoDescuento =
+                                                            (primerPago['monto_descuento'] ??
+                                                                    0)
+                                                                .toDouble();
+
+                                                        final montoSubtotal =
+                                                            (primerPago['monto_subtotal'] ??
+                                                                    0)
+                                                                .toDouble();
+
+                                                        final montoVuelto =
+                                                            (primerPago['monto_vuelto'] ??
+                                                                    0)
+                                                                .toDouble();
+
+                                                        final modoVuelto =
+                                                            (primerPago['modo_vuelto'] ??
+                                                                    '')
+                                                                .toString();
+
+                                                        final uidPago =
+                                                            (primerPago['uid_usuario'] ??
+                                                                    '')
+                                                                .toString();
+
+                                                        final Timestamp?
+                                                        horaPagoTimestamp =
+                                                            primerPago['hora_pago'];
+
+                                                        final horaPago =
+                                                            horaPagoTimestamp !=
+                                                                null
+                                                            ? DateFormat(
+                                                                'hh:mm a',
+                                                              ).format(
+                                                                horaPagoTimestamp
+                                                                    .toDate(),
+                                                              )
+                                                            : '--:--';
+
+                                                        /// ===== SUMA PAGOS =====
+                                                        double totalPagado = 0;
+
+                                                        for (final pago
+                                                            in pagos) {
+                                                          final pagoData =
+                                                              pago.data()
+                                                                  as Map<
+                                                                    String,
+                                                                    dynamic
+                                                                  >;
+
+                                                          totalPagado +=
+                                                              (pagoData['monto_pagado'] ??
+                                                                      0)
+                                                                  .toDouble();
+                                                        }
+
+                                                        return FutureBuilder<
+                                                          String
+                                                        >(
+                                                          future:
+                                                              obtenerNombreUsuario(
+                                                                uidPago,
+                                                              ),
+
+                                                          builder:
+                                                              (
+                                                                context,
+                                                                pagoUserSnapshot,
+                                                              ) {
+                                                                final nombrePago =
+                                                                    pagoUserSnapshot
+                                                                        .data ??
+                                                                    '...';
+
+                                                                return Container(
+                                                                  margin:
+                                                                      const EdgeInsets.only(
+                                                                        top: 10,
+                                                                      ),
+
+                                                                  child: Row(
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
+
+                                                                    children: [
+                                                                      /// ===================================================
+                                                                      /// COLUMNA IZQUIERDA
+                                                                      /// ===================================================
+                                                                      Expanded(
+                                                                        child: Container(
+                                                                          padding: const EdgeInsets.only(
+                                                                            right:
+                                                                                10,
+                                                                          ),
+
+                                                                          child: Column(
+                                                                            crossAxisAlignment:
+                                                                                CrossAxisAlignment.start,
+
+                                                                            children: [
+                                                                              /// HEADER
+                                                                              Row(
+                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                                                                                children: [
+                                                                                  Expanded(
+                                                                                    child: Text(
+                                                                                      "Pago: $nombrePago",
+
+                                                                                      style: const TextStyle(
+                                                                                        color: Colors.white,
+                                                                                        fontSize: 11,
+                                                                                        fontWeight: FontWeight.w600,
+                                                                                      ),
+
+                                                                                      overflow: TextOverflow.ellipsis,
+                                                                                    ),
+                                                                                  ),
+
+                                                                                  Text(
+                                                                                    horaPago,
+
+                                                                                    style: TextStyle(
+                                                                                      color: Colors.white.withOpacity(
+                                                                                        0.6,
+                                                                                      ),
+                                                                                      fontSize: 8,
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+
+                                                                              const SizedBox(
+                                                                                height: 8,
+                                                                              ),
+
+                                                                              /// LISTA PAGOS
+                                                                              ...pagos.map(
+                                                                                (
+                                                                                  pagoDoc,
+                                                                                ) {
+                                                                                  final pagoData =
+                                                                                      pagoDoc.data()
+                                                                                          as Map<
+                                                                                            String,
+                                                                                            dynamic
+                                                                                          >;
+
+                                                                                  final modoPago =
+                                                                                      (pagoData['modo_pago'] ??
+                                                                                              '')
+                                                                                          .toString();
+
+                                                                                  final montoPagado =
+                                                                                      (pagoData['monto_pagado'] ??
+                                                                                              0)
+                                                                                          .toDouble();
+
+                                                                                  return Padding(
+                                                                                    padding: const EdgeInsets.only(
+                                                                                      bottom: 4,
+                                                                                    ),
+
+                                                                                    child: Row(
+                                                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                                                                                      children: [
+                                                                                        Expanded(
+                                                                                          child: Text(
+                                                                                            modoPago,
+
+                                                                                            style: const TextStyle(
+                                                                                              color: Colors.white70,
+                                                                                              fontSize: 11,
+                                                                                            ),
+                                                                                          ),
+                                                                                        ),
+
+                                                                                        Text(
+                                                                                          montoPagado.toStringAsFixed(
+                                                                                            2,
+                                                                                          ),
+
+                                                                                          style: const TextStyle(
+                                                                                            color: Colors.white,
+                                                                                            fontSize: 11,
+                                                                                            fontWeight: FontWeight.w600,
+                                                                                          ),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                  );
+                                                                                },
+                                                                              ),
+
+                                                                              Divider(
+                                                                                color: Colors.white.withOpacity(
+                                                                                  0.1,
+                                                                                ),
+                                                                              ),
+
+                                                                              Align(
+                                                                                alignment: Alignment.centerRight,
+
+                                                                                child: Text(
+                                                                                  totalPagado.toStringAsFixed(
+                                                                                    2,
+                                                                                  ),
+
+                                                                                  style: const TextStyle(
+                                                                                    color: Colors.white,
+                                                                                    fontSize: 11,
+                                                                                    fontWeight: FontWeight.bold,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+
+                                                                              const SizedBox(
+                                                                                height: 6,
+                                                                              ),
+
+                                                                              _buildMiniRow(
+                                                                                "Total",
+                                                                                montoSubtotal,
+                                                                                Colors.greenAccent,
+                                                                              ),
+
+                                                                              Divider(
+                                                                                color: Colors.white.withOpacity(
+                                                                                  0.1,
+                                                                                ),
+                                                                              ),
+
+                                                                              _buildMiniRow(
+                                                                                "Vuelto ($modoVuelto)",
+                                                                                montoVuelto,
+                                                                                Colors.orangeAccent,
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      ),
+
+                                                                      /// DIVIDER VERTICAL
+                                                                      Container(
+                                                                        width:
+                                                                            1,
+                                                                        height:
+                                                                            180,
+                                                                        color: Colors
+                                                                            .white
+                                                                            .withOpacity(
+                                                                              0.08,
+                                                                            ),
+                                                                      ),
+
+                                                                      /// ===================================================
+                                                                      /// COLUMNA DERECHA
+                                                                      /// ===================================================
+                                                                      Expanded(
+                                                                        child: Container(
+                                                                          padding: const EdgeInsets.only(
+                                                                            left:
+                                                                                10,
+                                                                          ),
+
+                                                                          child: Column(
+                                                                            children: [
+                                                                              _buildMiniRow(
+                                                                                "Subtotal",
+                                                                                subtotalCuenta,
+                                                                                Colors.white,
+                                                                              ),
+
+                                                                              _buildMiniRow(
+                                                                                "Propina (+)",
+                                                                                montoPropina,
+                                                                                Colors.amberAccent,
+                                                                              ),
+
+                                                                              _buildMiniRow(
+                                                                                "Delivery (+)",
+                                                                                montoDelivery,
+                                                                                Colors.lightBlueAccent,
+                                                                              ),
+
+                                                                              _buildMiniRow(
+                                                                                "Descuento (-)",
+                                                                                montoDescuento,
+                                                                                Colors.redAccent,
+                                                                              ),
+
+                                                                              Divider(
+                                                                                color: Colors.white.withOpacity(
+                                                                                  0.1,
+                                                                                ),
+                                                                              ),
+
+                                                                              _buildMiniRow(
+                                                                                "Total",
+                                                                                montoSubtotal,
+                                                                                Colors.greenAccent,
+                                                                                bold: true,
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                );
+                                                              },
+                                                        );
+                                                      })(),
                                                   ],
                                                 ),
                                               );
@@ -450,4 +785,43 @@ class _VentasPageState extends State<VentasPage> {
       ),
     );
   }
+}
+
+Widget _buildMiniRow(
+  String titulo,
+  double monto,
+  Color color, {
+  bool bold = false,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 3),
+
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+      children: [
+        Expanded(
+          child: Text(
+            titulo,
+
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 11,
+              fontWeight: bold ? FontWeight.bold : FontWeight.w400,
+            ),
+          ),
+        ),
+
+        Text(
+          monto.toStringAsFixed(2),
+
+          style: TextStyle(
+            color: color,
+            fontSize: 11,
+            fontWeight: bold ? FontWeight.bold : FontWeight.w600,
+          ),
+        ),
+      ],
+    ),
+  );
 }
