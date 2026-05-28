@@ -36,7 +36,7 @@ class ContadoresMontos extends StatelessWidget {
         }).toList();
 
         /// =====================================================
-        /// CONTADORES
+        /// CONTADORES DINAMICOS
         /// =====================================================
 
         final Map<String, int> contadorTipoMesa = {};
@@ -45,14 +45,24 @@ class ContadoresMontos extends StatelessWidget {
         for (final pedido in pedidosHoy) {
           final data = pedido.data() as Map<String, dynamic>;
 
-          final tipoMesa = (data['tipo_mesa'] ?? '').toString().toLowerCase();
+          final tipoMesa = (data['tipo_mesa'] ?? 'Sin Tipo').toString().trim();
 
-          final estado = (data['estado'] ?? '').toString().toLowerCase();
+          final estado = (data['estado'] ?? 'Sin Estado').toString().trim();
 
           contadorTipoMesa[tipoMesa] = (contadorTipoMesa[tipoMesa] ?? 0) + 1;
 
           contadorEstado[estado] = (contadorEstado[estado] ?? 0) + 1;
         }
+
+        /// =====================================================
+        /// ORDENAR ALFABETICAMENTE
+        /// =====================================================
+
+        final tiposMesaOrdenados = contadorTipoMesa.entries.toList()
+          ..sort((a, b) => a.key.compareTo(b.key));
+
+        final estadosOrdenados = contadorEstado.entries.toList()
+          ..sort((a, b) => a.key.compareTo(b.key));
 
         return Container(
           width: double.infinity,
@@ -66,7 +76,7 @@ class ContadoresMontos extends StatelessWidget {
 
             borderRadius: BorderRadius.circular(14),
 
-            border: Border.all(color: Colors.white.withOpacity(0.05)),
+            border: Border.all(color: Colors.white.withOpacity(0.2)),
           ),
 
           child: Row(
@@ -79,28 +89,13 @@ class ContadoresMontos extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
 
                   child: Row(
-                    children: [
-                      if (contadorTipoMesa.containsKey('mesa'))
-                        _buildPill(
-                          label: "Mesa",
-                          value: contadorTipoMesa['mesa']!,
-                          color: const Color(0xFF22D3EE),
-                        ),
-
-                      if (contadorTipoMesa.containsKey('delivery'))
-                        _buildPill(
-                          label: "Delivery",
-                          value: contadorTipoMesa['delivery']!,
-                          color: const Color(0xFFFB923C),
-                        ),
-
-                      if (contadorTipoMesa.containsKey('llevar'))
-                        _buildPill(
-                          label: "Llevar",
-                          value: contadorTipoMesa['llevar']!,
-                          color: const Color(0xFFC084FC),
-                        ),
-                    ],
+                    children: tiposMesaOrdenados.map((entry) {
+                      return _buildPill(
+                        label: entry.key,
+                        value: entry.value,
+                        color: Colors.cyanAccent,
+                      );
+                    }).toList(),
                   ),
                 ),
               ),
@@ -111,7 +106,7 @@ class ContadoresMontos extends StatelessWidget {
               Container(
                 width: 1,
                 height: 24,
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withOpacity(0.2),
               ),
 
               const SizedBox(width: 5),
@@ -129,28 +124,13 @@ class ContadoresMontos extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
 
-                      children: [
-                        if (contadorEstado.containsKey('completado'))
-                          _buildPill(
-                            label: "Completados",
-                            value: contadorEstado['completado']!,
-                            color: const Color(0xFF4ADE80),
-                          ),
-
-                        if (contadorEstado.containsKey('pendiente'))
-                          _buildPill(
-                            label: "Pend",
-                            value: contadorEstado['pendiente']!,
-                            color: const Color(0xFFFBBF24),
-                          ),
-
-                        if (contadorEstado.containsKey('cancelado'))
-                          _buildPill(
-                            label: "Cancelados",
-                            value: contadorEstado['cancelado']!,
-                            color: const Color(0xFFFB7185),
-                          ),
-                      ],
+                      children: estadosOrdenados.map((entry) {
+                        return _buildPill(
+                          label: entry.key,
+                          value: entry.value,
+                          color: Colors.greenAccent,
+                        );
+                      }).toList(),
                     ),
                   ),
                 ),
@@ -198,6 +178,8 @@ Widget _buildPill({
             fontWeight: FontWeight.w500,
             height: 1,
           ),
+
+          overflow: TextOverflow.ellipsis,
         ),
 
         const SizedBox(height: 4),
