@@ -44,7 +44,7 @@ class ResumenMontos extends StatelessWidget {
         }
 
         /// =========================================================
-        /// TOTALES GENERALES
+        /// TOTALES
         /// =========================================================
         double totalDescuento = 0;
         double totalPropina = 0;
@@ -53,14 +53,9 @@ class ResumenMontos extends StatelessWidget {
         double totalVuelto = 0;
         double totalPagado = 0;
 
-        /// =========================================================
-        /// RECORRER CADA CUENTA
-        /// =========================================================
         for (final cuenta in pagosPorCuenta.entries) {
           final pagosCuenta = cuenta.value;
 
-          /// SOLO PRIMER PAGO
-          /// para evitar duplicados
           final primerPago = pagosCuenta.first.data() as Map<String, dynamic>;
 
           totalDescuento += (primerPago['monto_descuento'] ?? 0).toDouble();
@@ -73,9 +68,7 @@ class ResumenMontos extends StatelessWidget {
 
           totalVuelto += (primerPago['monto_vuelto'] ?? 0).toDouble();
 
-          /// =====================================================
           /// SUMAR TODOS LOS PAGOS
-          /// =====================================================
           for (final pago in pagosCuenta) {
             final pagoData = pago.data() as Map<String, dynamic>;
 
@@ -85,13 +78,16 @@ class ResumenMontos extends StatelessWidget {
 
         return Container(
           width: double.infinity,
-          margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-          padding: const EdgeInsets.all(14),
+
+          margin: const EdgeInsets.fromLTRB(12, 2, 12, 10),
+
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
 
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.04),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withOpacity(0.05)),
+            color: Colors.white.withOpacity(0.035),
+            borderRadius: BorderRadius.circular(12),
+
+            border: Border.all(color: Colors.white.withOpacity(0.04)),
           ),
 
           child: Column(
@@ -102,40 +98,44 @@ class ResumenMontos extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _buildResumenBox(
+                    child: _buildCompactBox(
                       titulo: "Descuento",
-                      valor: "- S/ ${totalDescuento.toStringAsFixed(2)}",
+                      valor: "-${totalDescuento.toStringAsFixed(2)}",
                       color: Colors.redAccent,
                     ),
                   ),
 
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
 
                   Expanded(
-                    child: _buildResumenBox(
+                    child: _buildCompactBox(
                       titulo: "Propina",
-                      valor: "+ S/ ${totalPropina.toStringAsFixed(2)}",
+                      valor: "+${totalPropina.toStringAsFixed(2)}",
                       color: Colors.amberAccent,
                     ),
                   ),
 
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
 
                   Expanded(
-                    child: _buildResumenBox(
+                    child: _buildCompactBox(
                       titulo: "Delivery",
-                      valor: "+ S/ ${totalDelivery.toStringAsFixed(2)}",
+                      valor: "+${totalDelivery.toStringAsFixed(2)}",
                       color: Colors.lightBlueAccent,
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
 
-              Divider(color: Colors.white.withOpacity(0.08)),
-
-              const SizedBox(height: 10),
+                child: Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Colors.white.withOpacity(0.06),
+                ),
+              ),
 
               /// =====================================================
               /// FILA INFERIOR
@@ -143,30 +143,30 @@ class ResumenMontos extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _buildResumenBox(
-                      titulo: "Total Final",
-                      valor: "S/ ${totalFinal.toStringAsFixed(2)}",
+                    child: _buildCompactBox(
+                      titulo: "Total",
+                      valor: totalFinal.toStringAsFixed(2),
                       color: Colors.greenAccent,
                       bold: true,
                     ),
                   ),
 
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
 
                   Expanded(
-                    child: _buildResumenBox(
+                    child: _buildCompactBox(
                       titulo: "Pagado",
-                      valor: "S/ ${totalPagado.toStringAsFixed(2)}",
+                      valor: totalPagado.toStringAsFixed(2),
                       color: Colors.white,
                     ),
                   ),
 
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
 
                   Expanded(
-                    child: _buildResumenBox(
+                    child: _buildCompactBox(
                       titulo: "Vuelto",
-                      valor: "S/ ${totalVuelto.toStringAsFixed(2)}",
+                      valor: totalVuelto.toStringAsFixed(2),
                       color: Colors.orangeAccent,
                     ),
                   ),
@@ -180,38 +180,53 @@ class ResumenMontos extends StatelessWidget {
   }
 }
 
-Widget _buildResumenBox({
+/// ===============================================================
+/// BOX COMPACTO
+/// ===============================================================
+Widget _buildCompactBox({
   required String titulo,
   required String valor,
   required Color color,
   bool bold = false,
 }) {
   return Container(
-    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
 
     decoration: BoxDecoration(
       color: Colors.black.withOpacity(0.12),
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(8),
     ),
 
     child: Column(
+      mainAxisSize: MainAxisSize.min,
+
       children: [
         Text(
           titulo,
-          style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 10),
-          textAlign: TextAlign.center,
+
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.65),
+            fontSize: 9.5,
+            fontWeight: FontWeight.w500,
+          ),
         ),
 
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
 
         Text(
-          valor,
+          "S/ $valor",
+
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+
           style: TextStyle(
             color: color,
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: bold ? FontWeight.bold : FontWeight.w600,
           ),
-          textAlign: TextAlign.center,
         ),
       ],
     ),

@@ -760,7 +760,7 @@ class _VentasPageState extends State<VentasPage> {
                                     },
                                   ),
                                   ResumenMontos(pedidoId: pedido.id),
-                                  const SizedBox(height: 14),
+                                  const SizedBox(height: 10),
                                 ],
                               ),
                             );
