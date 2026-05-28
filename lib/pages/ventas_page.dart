@@ -8,6 +8,7 @@ import '../widgets/app_sidebar.dart';
 import '../widgets/app_navbar.dart';
 import '../widgets/app_bottom_tabbar.dart';
 import '../widgets/ventas/resumen_montos.dart';
+import '../widgets/ventas/contadores_montos.dart';
 
 class VentasPage extends StatefulWidget {
   const VentasPage({super.key});
@@ -60,6 +61,8 @@ class _VentasPageState extends State<VentasPage> {
           child: Column(
             children: [
               const AppNavbar(),
+
+              const ContadoresMontos(),
 
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
