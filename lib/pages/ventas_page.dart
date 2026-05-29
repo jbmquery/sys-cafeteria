@@ -172,7 +172,7 @@ class _VentasPageState extends State<VentasPage> {
                                       style: TextStyle(
                                         color: estado == 'cancelado'
                                             ? Colors.redAccent
-                                            : Colors.greenAccent,
+                                            : const Color(0xFF00C8AA),
                                         fontSize: 11,
                                         fontWeight: FontWeight.w500,
                                       ),

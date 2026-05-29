@@ -93,7 +93,7 @@ class ContadoresMontos extends StatelessWidget {
                       return _buildPill(
                         label: entry.key,
                         value: entry.value,
-                        color: Colors.cyanAccent,
+                        color: const Color(0xFF00C8AA),
                       );
                     }).toList(),
                   ),
@@ -128,7 +128,7 @@ class ContadoresMontos extends StatelessWidget {
                         return _buildPill(
                           label: entry.key,
                           value: entry.value,
-                          color: Colors.greenAccent,
+                          color: const Color(0xFF00C8AA),
                         );
                       }).toList(),
                     ),

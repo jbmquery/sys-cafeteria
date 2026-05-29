@@ -8,6 +8,7 @@ import '../pages/edit_mesas_page.dart';
 import '../pages/edit_carta_page.dart';
 import '../services/navigation_service.dart';
 import '../pages/impresora_page.dart';
+import '../pages/caja_page.dart';
 
 class AppSidebar extends StatelessWidget {
   const AppSidebar({super.key});
@@ -64,7 +65,8 @@ class AppSidebar extends StatelessWidget {
             visible("Inventario") ||
             visible("Compras") ||
             visible("Proveedores") ||
-            visible("Clientes");
+            visible("Clientes") ||
+            visible("Caja");
 
         final administracionVisible =
             visible("Recetas") ||
@@ -166,6 +168,14 @@ class AppSidebar extends StatelessWidget {
                   menuItem(Icons.local_shipping_outlined, "Proveedores"),
                 if (visible("Clientes"))
                   menuItem(Icons.people_outline, "Clientes"),
+                if (visible("Caja"))
+                  menuItem(
+                    Icons.point_of_sale,
+                    "Caja",
+                    onTap: () {
+                      NavigationService.slideTo(context, const CajaPage());
+                    },
+                  ),
 
                 if (administracionVisible) const SizedBox(height: 14),
                 if (administracionVisible) sectionTitle("Administración"),
