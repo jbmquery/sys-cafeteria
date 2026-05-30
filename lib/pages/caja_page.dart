@@ -21,77 +21,6 @@ class CajaPage extends StatefulWidget {
 class _CajaPageState extends State<CajaPage> {
   int currentTab = 2;
 
-  bool cargandoCaja = true;
-
-  bool cajaAbierta = false;
-
-  String cajeroNombre = '-';
-  String horaInicio = '-';
-
-  String cajaId = '';
-
-  @override
-  void initState() {
-    super.initState();
-
-    obtenerCajaAbierta();
-  }
-
-  Future<void> obtenerCajaAbierta() async {
-    try {
-      final query = await FirebaseFirestore.instance
-          .collection('caja')
-          .where('estado', isEqualTo: true)
-          .orderBy('fecha', descending: true)
-          .limit(1)
-          .get();
-
-      if (query.docs.isNotEmpty) {
-        final doc = query.docs.first;
-
-        final data = doc.data();
-
-        final fechaTimestamp = data['fecha'] as Timestamp?;
-
-        final fecha = fechaTimestamp?.toDate();
-
-        String hora = '-';
-
-        if (fecha != null) {
-          hora =
-              "${fecha.hour.toString().padLeft(2, '0')}:"
-              "${fecha.minute.toString().padLeft(2, '0')}";
-        }
-
-        setState(() {
-          cajaAbierta = true;
-
-          cajaId = doc.id;
-
-          cajeroNombre = data['apodo'] ?? '-';
-
-          horaInicio = hora;
-        });
-      } else {
-        setState(() {
-          cajaAbierta = false;
-
-          cajaId = '';
-
-          cajeroNombre = '-';
-
-          horaInicio = '-';
-        });
-      }
-    } catch (e) {
-      debugPrint("Error obteniendo caja abierta: $e");
-    } finally {
-      setState(() {
-        cargandoCaja = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -118,147 +47,212 @@ class _CajaPageState extends State<CajaPage> {
                 const SizedBox(height: 10),
 
                 /// 🔥 BLOQUE SESIÓN CAJA
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('caja')
+                      .where('estado', isEqualTo: true)
+                      .orderBy('fecha', descending: true)
+                      .limit(1)
+                      .snapshots(),
 
-                  padding: const EdgeInsets.all(14),
+                  builder: (context, snapshot) {
+                    /// 🔄 CARGANDO
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
 
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
+                        padding: const EdgeInsets.all(20),
 
-                    borderRadius: BorderRadius.circular(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
 
-                    border: Border.all(color: Colors.white.withOpacity(0.05)),
-                  ),
-
-                  child: cargandoCaja
-                      ? const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(8),
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
-                      : Row(
-                          children: [
-                            /// 🔥 INFO
-                            Expanded(
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-
-                                children: [
-                                  Expanded(
-                                    child: _infoItem(
-                                      label: "Cajero",
-                                      value: cajeroNombre,
-                                    ),
-                                  ),
-
-                                  Expanded(
-                                    child: _infoItem(
-                                      label: "Inicio",
-                                      value: horaInicio,
-                                    ),
-                                  ),
-
-                                  Expanded(
-                                    child: _infoItem(
-                                      label: "Estado",
-                                      value: cajaAbierta
-                                          ? "Abierto"
-                                          : "Cerrado",
-
-                                      valueColor: cajaAbierta
-                                          ? Colors.greenAccent
-                                          : Colors.redAccent,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(width: 12),
-
-                            /// 🔥 BOTÓN
-                            Container(
-                              height: 44,
-
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: cajaAbierta
-                                      ? [
-                                          Colors.redAccent,
-                                          Colors.deepOrangeAccent,
-                                        ]
-                                      : [
-                                          const Color.fromARGB(
-                                            255,
-                                            132,
-                                            95,
-                                            221,
-                                          ),
-                                          const Color.fromARGB(
-                                            255,
-                                            111,
-                                            114,
-                                            255,
-                                          ),
-                                        ],
-                                ),
-
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-
-                              child: ElevatedButton.icon(
-                                onPressed: () async {
-                                  if (!cajaAbierta) {
-                                    await showDialog(
-                                      context: context,
-                                      builder: (_) =>
-                                          const AperturaCajaDialog(),
-                                    );
-
-                                    obtenerCajaAbierta();
-                                  }
-                                },
-
-                                icon: Icon(
-                                  cajaAbierta ? Icons.lock_outline : Icons.add,
-
-                                  color: Colors.black,
-                                  size: 16,
-                                ),
-
-                                label: Text(
-                                  cajaAbierta ? "Cerrar Caja" : "Abrir Caja",
-
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-
-                                  shadowColor: Colors.transparent,
-
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                          borderRadius: BorderRadius.circular(18),
                         ),
+
+                        child: const Center(child: CircularProgressIndicator()),
+                      );
+                    }
+
+                    /// ❌ ERROR
+                    if (snapshot.hasError) {
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+
+                        padding: const EdgeInsets.all(20),
+
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+
+                        child: Text(
+                          "Error: ${snapshot.error}",
+
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      );
+                    }
+
+                    final docs = snapshot.data?.docs ?? [];
+
+                    bool cajaAbierta = docs.isNotEmpty;
+
+                    String cajeroNombre = '-';
+                    String horaInicio = '-';
+                    String cajaId = '';
+
+                    /// 🔥 SI HAY CAJA ABIERTA
+                    if (cajaAbierta) {
+                      final doc = docs.first;
+
+                      final data = doc.data() as Map<String, dynamic>;
+
+                      cajaId = doc.id;
+
+                      cajeroNombre = data['apodo'] ?? '-';
+
+                      final fechaTimestamp = data['fecha'] as Timestamp?;
+
+                      final fecha = fechaTimestamp?.toDate();
+
+                      if (fecha != null) {
+                        horaInicio =
+                            "${fecha.hour.toString().padLeft(2, '0')}:"
+                            "${fecha.minute.toString().padLeft(2, '0')}";
+                      }
+                    }
+
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+
+                      padding: const EdgeInsets.all(14),
+
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+
+                        borderRadius: BorderRadius.circular(18),
+
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.05),
+                        ),
+                      ),
+
+                      child: Row(
+                        children: [
+                          /// 🔥 INFO
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                              children: [
+                                Expanded(
+                                  child: _infoItem(
+                                    label: "Cajero",
+                                    value: cajeroNombre,
+                                  ),
+                                ),
+
+                                Expanded(
+                                  child: _infoItem(
+                                    label: "Inicio",
+                                    value: horaInicio,
+                                  ),
+                                ),
+
+                                Expanded(
+                                  child: _infoItem(
+                                    label: "Estado",
+                                    value: cajaAbierta ? "Abierto" : "Cerrado",
+
+                                    valueColor: cajaAbierta
+                                        ? Colors.greenAccent
+                                        : Colors.redAccent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(width: 12),
+
+                          /// 🔥 BOTÓN
+                          Container(
+                            height: 40,
+
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: cajaAbierta
+                                    ? [
+                                        Colors.redAccent,
+                                        Colors.deepOrangeAccent,
+                                      ]
+                                    : [
+                                        const Color.fromARGB(255, 132, 95, 221),
+                                        const Color.fromARGB(
+                                          255,
+                                          111,
+                                          114,
+                                          255,
+                                        ),
+                                      ],
+                              ),
+
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+
+                            child: ElevatedButton.icon(
+                              onPressed: () async {
+                                if (!cajaAbierta) {
+                                  await showDialog(
+                                    context: context,
+                                    builder: (_) => const AperturaCajaDialog(),
+                                  );
+                                }
+                              },
+
+                              icon: Icon(
+                                cajaAbierta ? Icons.lock_outline : Icons.add,
+
+                                color: Colors.black,
+                                size: 14,
+                              ),
+
+                              label: Text(
+                                cajaAbierta ? "Cerrar Caja" : "Abrir Caja",
+
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+
+                                shadowColor: Colors.transparent,
+
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
 
-                const SizedBox(height: 14),
+                const SizedBox(height: 5),
 
                 /// 🔵 TAB BAR
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 3,
+                  ),
                   padding: const EdgeInsets.all(6),
 
                   decoration: BoxDecoration(
@@ -291,7 +285,7 @@ class _CajaPageState extends State<CajaPage> {
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 5),
 
                 /// 🟣 CONTENIDO TABS
                 const Expanded(
