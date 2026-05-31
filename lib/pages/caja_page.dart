@@ -110,7 +110,7 @@ class _CajaPageState extends State<CajaPage> {
 
                       cajaId = doc.id;
 
-                      cajeroNombre = data['apodo'] ?? '-';
+                      cajeroNombre = data['apodo_apertura'] ?? '-';
 
                       final fechaTimestamp = data['fecha'] as Timestamp?;
 

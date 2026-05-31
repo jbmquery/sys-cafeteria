@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../pages/carta_page.dart';
 
 class TableCard extends StatelessWidget {
+  final VoidCallback? onTapMesa;
   final String nombre;
   final String subtitulo;
   final bool disponible;
@@ -16,25 +17,13 @@ class TableCard extends StatelessWidget {
     required this.disponible,
     required this.uidMesa,
     required this.uidUsuarioAccion,
+    required this.onTapMesa,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: disponible
-          ? () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CartaPage(
-                    nombreMesa: nombre,
-                    uidMesa: uidMesa,
-                    uidUsuarioAccion: uidUsuarioAccion,
-                  ),
-                ),
-              );
-            }
-          : null,
+      onTap: disponible ? onTapMesa : null,
 
       child: Container(
         padding: const EdgeInsets.all(7),

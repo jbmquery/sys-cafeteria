@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'envases_dialog.dart';
+import 'agregar_pago_movimiento.dart';
 
 class CuentaPago extends StatefulWidget {
   final String pedidoId;
@@ -206,6 +207,7 @@ class _CuentaPagoState extends State<CuentaPago> {
       /// ===============================
       /// CREAR PAGOS
       /// ===============================
+      final List<Map<String, dynamic>> pagosRegistrados = [];
 
       for (final p in pagos) {
         final monto = double.tryParse(p["monto"].text) ?? 0;
@@ -216,11 +218,13 @@ class _CuentaPagoState extends State<CuentaPago> {
 
         final montoCuenta = montoProductosSeleccionados();
 
+        final horaPago = Timestamp.now();
+
         batch.set(pagoRef, {
           'modo_pago': p["tipo"],
           'modo_vuelto': modoVuelto,
           'uid_usuario': uidUsuarioActual,
-          'hora_pago': Timestamp.now(),
+          'hora_pago': horaPago,
           'monto': montoCuenta,
           'cuenta': numeroCuentaActual,
           'monto_delivery': totalDelivery(),
@@ -229,6 +233,24 @@ class _CuentaPagoState extends State<CuentaPago> {
           'monto_propina': totalPropina(),
           'monto_subtotal': totalFinal(),
           'monto_vuelto': totalPagado() - totalFinal(),
+        });
+
+        pagosRegistrados.add({
+          'modo_pago': p["tipo"],
+          'modo_vuelto': modoVuelto,
+          'uid_usuario': uidUsuarioActual,
+          'hora_pago': horaPago,
+          'monto': montoCuenta,
+          'cuenta': numeroCuentaActual,
+          'monto_delivery': totalDelivery(),
+          'monto_descuento': totalDescuento(),
+          'monto_pagado': monto,
+          'monto_propina': totalPropina(),
+          'monto_subtotal': totalFinal(),
+          'monto_vuelto': totalPagado() - totalFinal(),
+
+          /// IMPORTANTE
+          'num_pedido': pedidoData['num_pedido'],
         });
       }
 
@@ -291,6 +313,14 @@ class _CuentaPagoState extends State<CuentaPago> {
       /// ===============================
 
       await batch.commit();
+
+      for (final pago in pagosRegistrados) {
+        await AgregarPagoMovimiento.registrar(
+          pedidoId: widget.pedidoId,
+          pedidoData: pedidoData,
+          pagoData: pago,
+        );
+      }
 
       /// ===============================
       /// ACTUALIZAR SIGUIENTE CUENTA

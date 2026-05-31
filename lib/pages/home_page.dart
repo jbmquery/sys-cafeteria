@@ -7,6 +7,7 @@ import '../widgets/app_navbar.dart';
 import '../widgets/table_card.dart';
 import '../widgets/app_bottom_tabbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../pages/carta_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,6 +31,72 @@ class _HomePageState extends State<HomePage> {
     }
 
     return 9999;
+  }
+
+  Future<bool> existeCajaAbierta() async {
+    try {
+      final ahora = DateTime.now();
+
+      final inicioDia = DateTime(ahora.year, ahora.month, ahora.day);
+
+      final finDia = DateTime(ahora.year, ahora.month, ahora.day, 23, 59, 59);
+
+      final query = await FirebaseFirestore.instance
+          .collection('caja')
+          .where('estado', isEqualTo: true)
+          .where('fecha', isGreaterThanOrEqualTo: Timestamp.fromDate(inicioDia))
+          .where('fecha', isLessThanOrEqualTo: Timestamp.fromDate(finDia))
+          .limit(1)
+          .get();
+
+      return query.docs.isNotEmpty;
+    } catch (e) {
+      debugPrint("Error verificando caja: $e");
+
+      return false;
+    }
+  }
+
+  void mostrarToast(String mensaje) {
+    final overlay = Overlay.of(context);
+
+    late OverlayEntry entry;
+
+    entry = OverlayEntry(
+      builder: (_) => Positioned(
+        top: 60,
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Colors.redAccent, Colors.deepOrangeAccent],
+              ),
+
+              borderRadius: BorderRadius.circular(14),
+            ),
+
+            child: Text(
+              mensaje,
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(entry);
+
+    Future.delayed(const Duration(milliseconds: 800), () {
+      entry.remove();
+    });
   }
 
   @override
@@ -111,6 +178,30 @@ class _HomePageState extends State<HomePage> {
                                   disponible: data['disponibilidad'] ?? true,
                                   uidMesa: mesa.id,
                                   uidUsuarioAccion: uidUsuarioActual,
+
+                                  onTapMesa: () async {
+                                    final cajaAbierta =
+                                        await existeCajaAbierta();
+
+                                    if (!cajaAbierta) {
+                                      mostrarToast(
+                                        "Debe abrir una caja antes de registrar pedidos.",
+                                      );
+
+                                      return;
+                                    }
+
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => CartaPage(
+                                          nombreMesa: data['nombre_mesa'] ?? '',
+                                          uidMesa: mesa.id,
+                                          uidUsuarioAccion: uidUsuarioActual,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 );
                               }).toList(),
                             ),

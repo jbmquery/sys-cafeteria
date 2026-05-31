@@ -80,9 +80,9 @@ class _AperturaCajaDialogState extends State<AperturaCajaDialog> {
       final apodo = cargandoUsuario ? "Cargando..." : apodoUsuario;
 
       await FirebaseFirestore.instance.collection('caja').add({
-        'uid_usuario': user?.uid ?? '',
+        'uid_usuario_apertura': user?.uid ?? '',
 
-        'apodo': apodo,
+        'apodo_apertura': apodo,
 
         'fecha': Timestamp.now(),
 
