@@ -274,24 +274,28 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
 
                           final horaActual = formatearFecha(data['fecha_pago']);
 
-                          String horaAnterior = '';
+                          bool usarColorClaro = true;
 
-                          if (index > 0) {
-                            final dataAnterior = movimientos[index - 1].data();
-                            horaAnterior = formatearFecha(
-                              dataAnterior['fecha_pago'],
+                          for (int i = 0; i <= index; i++) {
+                            if (i == 0) continue;
+
+                            final horaFilaActual = formatearFecha(
+                              movimientos[i].data()['fecha_pago'],
                             );
+
+                            final horaFilaAnterior = formatearFecha(
+                              movimientos[i - 1].data()['fecha_pago'],
+                            );
+
+                            if (horaFilaActual != horaFilaAnterior) {
+                              usarColorClaro = !usarColorClaro;
+                            }
                           }
-
-                          final cambioHora = horaActual != horaAnterior;
-
                           return DataRow(
                             color: MaterialStateProperty.all(
-                              cambioHora
-                                  ? const Color(0xFF243247)
-                                  : index.isEven
-                                  ? const Color(0xFF111827)
-                                  : const Color(0xFF172033),
+                              usarColorClaro
+                                  ? const Color(0xFF172033)
+                                  : const Color(0xFF111827),
                             ),
                             cells: [
                               DataCell(
