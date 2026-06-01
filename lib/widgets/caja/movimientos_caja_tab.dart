@@ -125,6 +125,7 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
                       (dataB['fecha_pago'] as Timestamp?)?.toDate() ??
                       DateTime(2000);
 
+                  // Hora descendente
                   final comparacionHora = fechaB.compareTo(fechaA);
 
                   if (comparacionHora != 0) {
@@ -134,7 +135,8 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
                   final tipoA = (dataA['tipo'] ?? '').toString();
                   final tipoB = (dataB['tipo'] ?? '').toString();
 
-                  return tipoA.compareTo(tipoB);
+                  // Tipo descendente (Z-A)
+                  return tipoB.compareTo(tipoA);
                 });
 
                 return Scrollbar(
@@ -294,7 +296,7 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
                           return DataRow(
                             color: MaterialStateProperty.all(
                               usarColorClaro
-                                  ? const Color(0xFF172033)
+                                  ? const Color(0xFF1E293B)
                                   : const Color(0xFF111827),
                             ),
                             cells: [
