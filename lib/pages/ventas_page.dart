@@ -126,7 +126,7 @@ class _VentasPageState extends State<VentasPage> {
 
                         final fecha = (data['fecha'] as Timestamp).toDate();
 
-                        final hora = DateFormat('hh:mm a').format(fecha);
+                        final hora = DateFormat('HH:mm').format(fecha);
 
                         final estado = data['estado'] ?? '';
 
@@ -168,7 +168,7 @@ class _VentasPageState extends State<VentasPage> {
                                     const SizedBox(height: 4),
 
                                     Text(
-                                      "$hora    $estado",
+                                      "($hora)    $estado",
                                       style: TextStyle(
                                         color: estado == 'cancelado'
                                             ? Colors.redAccent
@@ -497,7 +497,7 @@ class _VentasPageState extends State<VentasPage> {
                                                             horaPagoTimestamp !=
                                                                 null
                                                             ? DateFormat(
-                                                                'hh:mm a',
+                                                                'HH:mm',
                                                               ).format(
                                                                 horaPagoTimestamp
                                                                     .toDate(),
