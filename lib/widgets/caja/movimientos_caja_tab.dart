@@ -111,247 +111,301 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
                   );
                 }
 
-                final movimientos = snapshot.data!.docs;
+                final movimientos = snapshot.data!.docs.toList();
 
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
+                movimientos.sort((a, b) {
+                  final dataA = a.data();
+                  final dataB = b.data();
 
-                  child: DataTable(
-                    columnSpacing: 20,
-                    horizontalMargin: 10,
-                    dataRowMinHeight: 60,
-                    dataRowMaxHeight: 70,
-                    headingRowHeight: 42,
+                  final fechaA =
+                      (dataA['fecha_pago'] as Timestamp?)?.toDate() ??
+                      DateTime(2000);
 
-                    headingRowColor: MaterialStateProperty.all(
-                      const Color(0xFF1E293B),
-                    ),
+                  final fechaB =
+                      (dataB['fecha_pago'] as Timestamp?)?.toDate() ??
+                      DateTime(2000);
 
-                    dataRowColor: MaterialStateProperty.resolveWith(
-                      (states) => const Color(0xFF111827),
-                    ),
+                  final comparacionHora = fechaB.compareTo(fechaA);
 
-                    columns: const [
-                      DataColumn(
-                        label: SizedBox(
-                          child: Text(
-                            'Hora',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                  if (comparacionHora != 0) {
+                    return comparacionHora;
+                  }
+
+                  final tipoA = (dataA['tipo'] ?? '').toString();
+                  final tipoB = (dataB['tipo'] ?? '').toString();
+
+                  return tipoA.compareTo(tipoB);
+                });
+
+                return Scrollbar(
+                  thumbVisibility: true,
+
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+
+                      child: DataTable(
+                        columnSpacing: 20,
+                        horizontalMargin: 10,
+                        dataRowMinHeight: 60,
+                        dataRowMaxHeight: 70,
+                        headingRowHeight: 42,
+
+                        headingRowColor: MaterialStateProperty.all(
+                          const Color(0xFF1E293B),
                         ),
-                      ),
 
-                      DataColumn(
-                        label: SizedBox(
-                          child: Text(
-                            'Tipo',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        dataRowColor: MaterialStateProperty.resolveWith(
+                          (states) => const Color(0xFF111827),
                         ),
-                      ),
 
-                      DataColumn(
-                        label: SizedBox(
-                          child: Text(
-                            'Categoría',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      DataColumn(
-                        label: SizedBox(
-                          child: Text(
-                            'Descripción',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      DataColumn(
-                        label: SizedBox(
-                          child: Text(
-                            'Método',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      DataColumn(
-                        label: SizedBox(
-                          child: Text(
-                            'Monto',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      DataColumn(
-                        label: SizedBox(
-                          child: Text(
-                            'Pedido',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      DataColumn(
-                        label: SizedBox(
-                          child: Text(
-                            'Pago',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-
-                    rows: movimientos.map((doc) {
-                      final data = doc.data();
-
-                      final tipo = data['tipo'] ?? '';
-
-                      final monto = (data['monto'] as num?)?.toDouble() ?? 0;
-
-                      final colorMovimiento = tipo == 'ingreso'
-                          ? Colors.greenAccent
-                          : Colors.redAccent;
-
-                      return DataRow(
-                        cells: [
-                          DataCell(
-                            SizedBox(
+                        columns: const [
+                          DataColumn(
+                            label: Center(
                               child: Text(
-                                formatearFecha(data['fecha_pago']),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          DataCell(
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 0,
-                              ),
-                              decoration: BoxDecoration(
-                                color: colorMovimiento.withOpacity(.15),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                tipo.toUpperCase(),
+                                'Hora',
                                 style: TextStyle(
-                                  color: colorMovimiento,
+                                  color: Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 11,
                                 ),
                               ),
                             ),
                           ),
 
-                          DataCell(
-                            SizedBox(
+                          DataColumn(
+                            label: Center(
                               child: Text(
-                                data['categoria'] ?? '',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          DataCell(
-                            SizedBox(
-                              child: Text(
-                                data['descripcion'] ?? '',
-                                softWrap: true,
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 11,
-                                  height: 1.1,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          DataCell(
-                            SizedBox(
-                              child: Text(
-                                data['metodo_monetario'] ?? '',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          DataCell(
-                            SizedBox(
-                              child: Text(
-                                "S/ ${monto.toStringAsFixed(2)}",
+                                'Tipo',
                                 style: TextStyle(
-                                  color: colorMovimiento,
+                                  color: Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 11,
                                 ),
                               ),
                             ),
                           ),
 
-                          DataCell(
-                            SizedBox(
+                          DataColumn(
+                            label: Center(
                               child: Text(
-                                data['apodo_pedido'] ?? '',
-                                style: const TextStyle(
+                                'Categoría',
+                                style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
                           ),
 
-                          DataCell(
-                            SizedBox(
+                          DataColumn(
+                            label: Center(
                               child: Text(
-                                data['apodo_pago'] ?? '',
-                                style: const TextStyle(
+                                'Descripción',
+                                style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          DataColumn(
+                            label: Center(
+                              child: Text(
+                                'Método',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          DataColumn(
+                            label: Center(
+                              child: Text(
+                                'Monto',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          DataColumn(
+                            label: Center(
+                              child: Text(
+                                'Pedido',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          DataColumn(
+                            label: Center(
+                              child: Text(
+                                'Pago',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
                           ),
                         ],
-                      );
-                    }).toList(),
+
+                        rows: List.generate(movimientos.length, (index) {
+                          final doc = movimientos[index];
+                          final data = doc.data();
+
+                          final tipo = data['tipo'] ?? '';
+
+                          final monto =
+                              (data['monto'] as num?)?.toDouble() ?? 0;
+
+                          final colorMovimiento = tipo == 'ingreso'
+                              ? Colors.greenAccent
+                              : Colors.redAccent;
+
+                          final horaActual = formatearFecha(data['fecha_pago']);
+
+                          String horaAnterior = '';
+
+                          if (index > 0) {
+                            final dataAnterior = movimientos[index - 1].data();
+                            horaAnterior = formatearFecha(
+                              dataAnterior['fecha_pago'],
+                            );
+                          }
+
+                          final cambioHora = horaActual != horaAnterior;
+
+                          return DataRow(
+                            color: MaterialStateProperty.all(
+                              cambioHora
+                                  ? const Color(0xFF243247)
+                                  : index.isEven
+                                  ? const Color(0xFF111827)
+                                  : const Color(0xFF172033),
+                            ),
+                            cells: [
+                              DataCell(
+                                Center(
+                                  child: Text(
+                                    formatearFecha(data['fecha_pago']),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              DataCell(
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 0,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colorMovimiento.withOpacity(.15),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    tipo.toUpperCase(),
+                                    style: TextStyle(
+                                      color: colorMovimiento,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              DataCell(
+                                Center(
+                                  child: Text(
+                                    data['categoria'] ?? '',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              DataCell(
+                                SizedBox(
+                                  child: Text(
+                                    data['descripcion'] ?? '',
+                                    softWrap: true,
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 11,
+                                      height: 1.1,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              DataCell(
+                                Center(
+                                  child: Text(
+                                    data['metodo_monetario'] ?? '',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              DataCell(
+                                Center(
+                                  child: Text(
+                                    "S/ ${monto.toStringAsFixed(2)}",
+                                    style: TextStyle(
+                                      color: colorMovimiento,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              DataCell(
+                                Center(
+                                  child: Text(
+                                    data['apodo_pedido'] ?? '',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              DataCell(
+                                Center(
+                                  child: Text(
+                                    data['apodo_pago'] ?? '',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }),
+                      ),
+                    ),
                   ),
                 );
               },
