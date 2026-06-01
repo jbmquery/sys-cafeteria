@@ -112,7 +112,16 @@ cuenta #: ${pagoData['cuenta'] ?? ''}
 
       final vuelto = (pagoData['monto_vuelto'] as num?)?.toDouble() ?? 0;
 
-      if (vuelto > 0) {
+      /// Verificar si ya existe un vuelto registrado
+      final existeVuelto = await cajaRef
+          .collection('movimientos')
+          .where('id_pedido', isEqualTo: pedidoId)
+          .where('cuenta', isEqualTo: pagoData['cuenta'] ?? '')
+          .where('categoria', isEqualTo: 'vuelto')
+          .limit(1)
+          .get();
+
+      if (vuelto > 0 && existeVuelto.docs.isEmpty) {
         await cajaRef.collection('movimientos').add({
           'fecha_pedido': pedidoData['fecha'],
           'fecha_pago': pagoData['hora_pago'],
