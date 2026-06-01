@@ -100,6 +100,10 @@ cuenta #: ${pagoData['cuenta'] ?? ''}
         'apodo_pago': apodoPago,
 
         'id_pedido': pedidoId,
+        'num_pedido': pagoData['num_pedido'] ?? '',
+        'mesa': pedidoData['nombre_mesa'] ?? '',
+        'cuenta': pagoData['cuenta'] ?? '',
+        'tipo_mesa': pedidoData['tipo_mesa'] ?? '',
       });
 
       /// ==========================
@@ -129,6 +133,10 @@ cuenta #: ${pagoData['cuenta'] ?? ''}
           'apodo_pago': apodoPago,
 
           'id_pedido': pedidoId,
+          'num_pedido': pagoData['num_pedido'] ?? '',
+          'mesa': pedidoData['nombre_mesa'] ?? '',
+          'cuenta': pagoData['cuenta'] ?? '',
+          'tipo_mesa': pedidoData['tipo_mesa'] ?? '',
         });
       }
     } catch (e) {
