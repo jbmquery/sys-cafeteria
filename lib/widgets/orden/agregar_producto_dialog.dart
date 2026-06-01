@@ -47,6 +47,7 @@ class _AgregarProductoDialogState extends State<AgregarProductoDialog> {
       "uid_usuario": uidActual,
       "codigo_barra": "",
       "vence": "",
+      "hora_detalle": Timestamp.now(),
     });
 
     /// 🔹 ESPERAR UN MICRO MOMENTO PARA ASEGURAR SINCRONIZACIÓN

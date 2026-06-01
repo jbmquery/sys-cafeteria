@@ -646,6 +646,7 @@ class _CartaPageState extends State<CartaPage> {
             "uid_usuario": widget.uidUsuarioAccion,
             "codigo_barra": "",
             "vence": "",
+            "hora_detalle": Timestamp.now(),
           });
 
           final temporal = item["id_detalle_padre_temporal"]?.toString() ?? "";

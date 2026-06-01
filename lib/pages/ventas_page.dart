@@ -327,6 +327,21 @@ class _VentasPageState extends State<VentasPage> {
                                                           (item['precio'] ?? 0)
                                                               .toDouble();
 
+                                                      final Timestamp?
+                                                      horaDetalleTimestamp =
+                                                          item['hora_detalle'];
+
+                                                      final horaDetalle =
+                                                          horaDetalleTimestamp !=
+                                                              null
+                                                          ? DateFormat(
+                                                              'HH:mm',
+                                                            ).format(
+                                                              horaDetalleTimestamp
+                                                                  .toDate(),
+                                                            )
+                                                          : '--:--';
+
                                                       return FutureBuilder<
                                                         String
                                                       >(
@@ -359,16 +374,29 @@ class _VentasPageState extends State<VentasPage> {
 
                                                                   children: [
                                                                     Expanded(
-                                                                      child: Text(
-                                                                        mismoUsuario
-                                                                            ? "${item['nombre']}"
-                                                                            : "($nombreDetalle) ${item['nombre']}",
+                                                                      child: RichText(
+                                                                        text: TextSpan(
+                                                                          children: [
+                                                                            TextSpan(
+                                                                              text: mismoUsuario
+                                                                                  ? "${item['nombre']}"
+                                                                                  : "($nombreDetalle) ${item['nombre']}",
+                                                                              style: const TextStyle(
+                                                                                color: Colors.white70,
+                                                                                fontSize: 12,
+                                                                              ),
+                                                                            ),
 
-                                                                        style: const TextStyle(
-                                                                          color:
-                                                                              Colors.white70,
-                                                                          fontSize:
-                                                                              12,
+                                                                            TextSpan(
+                                                                              text: " ($horaDetalle)",
+                                                                              style: TextStyle(
+                                                                                color: Colors.white.withOpacity(
+                                                                                  0.45,
+                                                                                ),
+                                                                                fontSize: 8,
+                                                                              ),
+                                                                            ),
+                                                                          ],
                                                                         ),
                                                                       ),
                                                                     ),
