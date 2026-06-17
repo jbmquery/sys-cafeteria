@@ -14,7 +14,7 @@ class _ResumenGeneralTabState extends State<ResumenGeneralTab> {
   Widget _card({required Widget child}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
 
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
@@ -205,7 +205,7 @@ class _ResumenGeneralTabState extends State<ResumenGeneralTab> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
 
       child: Column(
         children: [
@@ -261,6 +261,12 @@ class _ResumenGeneralTabState extends State<ResumenGeneralTab> {
               ),
 
               _miniCard(
+                title: "Contado Real",
+                value: "S/ 2,260.00",
+                icon: Icons.payments_outlined,
+              ),
+
+              _miniCard(
                 title: "Ingresos",
                 value: "S/ 2,450.00",
                 icon: Icons.arrow_downward,
@@ -275,16 +281,15 @@ class _ResumenGeneralTabState extends State<ResumenGeneralTab> {
               ),
 
               _miniCard(
-                title: "Contado Real",
-                value: "S/ 2,260.00",
-                icon: Icons.payments_outlined,
-              ),
-
-              _miniCard(
                 title: "Diferencia",
                 value: "+ S/ 20.00",
                 icon: Icons.balance,
-                valueColor: Colors.greenAccent,
+              ),
+
+              _miniCard(
+                title: "Vuelto",
+                value: "S/ 20.00",
+                icon: Icons.currency_exchange,
               ),
             ],
           ),

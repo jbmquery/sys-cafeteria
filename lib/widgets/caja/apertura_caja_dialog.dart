@@ -1,3 +1,4 @@
+//lib/widgets/caja/apertura_caja_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -79,22 +80,20 @@ class _AperturaCajaDialogState extends State<AperturaCajaDialog> {
 
       final apodo = cargandoUsuario ? "Cargando..." : apodoUsuario;
 
-      await FirebaseFirestore.instance.collection('caja').add({
+      // Crear documento principal de caja
+      final cajaRef = await FirebaseFirestore.instance.collection('caja').add({
         'uid_usuario_apertura': user?.uid ?? '',
-
         'apodo_apertura': apodo,
-
         'fecha': Timestamp.now(),
-
         'sede': sedeSeleccionada ?? '',
-
         'turno': turnoSeleccionado ?? '',
-
-        'monto_apertura': montoApertura,
-
-        'observacion': observacionController.text.trim(),
-
+        'observacion_apertura': observacionController.text.trim(),
         'estado': true,
+      });
+
+      // Crear registro en subcolección resumen
+      await cajaRef.collection('resumen').add({
+        'monto_apertura': montoApertura,
       });
 
       if (mounted) {

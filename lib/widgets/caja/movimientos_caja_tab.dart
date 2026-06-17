@@ -54,24 +54,179 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(left: 16, top: 0, right: 16, bottom: 0),
 
       child: Column(
         children: [
-          const Align(
-            alignment: Alignment.centerLeft,
+          Container(
+            margin: const EdgeInsets.only(bottom: 8),
 
-            child: Text(
-              "Movimientos de Caja",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Row(
+              children: [
+                /// FILTRO
+                SizedBox(
+                  width: 38,
+                  height: 38,
+
+                  child: ElevatedButton(
+                    onPressed: () {},
+
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1E293B),
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+
+                    child: const Icon(
+                      Icons.filter_alt_outlined,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                /// REGISTRAR EGRESO
+                Expanded(
+                  child: SizedBox(
+                    height: 38,
+
+                    child: ElevatedButton(
+                      onPressed: () {},
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1E293B),
+                        padding: EdgeInsets.zero,
+
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+
+                        children: [
+                          Text(
+                            "Registrar",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.white,
+                              height: 1.25,
+                            ),
+                          ),
+
+                          Text(
+                            "Egreso",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.white,
+                              height: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                /// INGRESO MANUAL
+                Expanded(
+                  child: SizedBox(
+                    height: 38,
+
+                    child: ElevatedButton(
+                      onPressed: () {},
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1E293B),
+                        padding: EdgeInsets.zero,
+
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+
+                        children: [
+                          Text(
+                            "Ingreso",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.white,
+                              height: 1.25,
+                            ),
+                          ),
+
+                          Text(
+                            "Manual",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.white,
+                              height: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                /// REALIZAR AJUSTE
+                Expanded(
+                  child: SizedBox(
+                    height: 38,
+
+                    child: ElevatedButton(
+                      onPressed: () {},
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1E293B),
+                        padding: EdgeInsets.zero,
+
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+
+                        children: [
+                          Text(
+                            "Realizar",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.white,
+                              height: 1.25,
+                            ),
+                          ),
+
+                          Text(
+                            "Ajuste",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.white,
+                              height: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-
-          const SizedBox(height: 20),
 
           Expanded(
             child: FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -171,6 +326,7 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 11,
                                 ),
                               ),
                             ),
@@ -183,6 +339,7 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 11,
                                 ),
                               ),
                             ),
@@ -195,6 +352,7 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 11,
                                 ),
                               ),
                             ),
@@ -207,6 +365,7 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 11,
                                 ),
                               ),
                             ),
@@ -219,6 +378,7 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 11,
                                 ),
                               ),
                             ),
@@ -231,6 +391,7 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 11,
                                 ),
                               ),
                             ),
@@ -243,6 +404,7 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 11,
                                 ),
                               ),
                             ),
@@ -255,6 +417,7 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 11,
                                 ),
                               ),
                             ),

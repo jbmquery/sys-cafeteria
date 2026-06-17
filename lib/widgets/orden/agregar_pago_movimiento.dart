@@ -1,3 +1,4 @@
+//lib/widgets/orden/agregar_pago_movimiento.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AgregarPagoMovimiento {
@@ -71,9 +72,9 @@ class AgregarPagoMovimiento {
 
       final descripcion =
           '''
-pedido #: ${pagoData['num_pedido'] ?? ''}
-mesa: ${pedidoData['nombre_mesa'] ?? ''}
-cuenta #: ${pagoData['cuenta'] ?? ''}
+pedido: n° ${pagoData['num_pedido'] ?? ''}
+${pedidoData['nombre_mesa'] ?? ''}
+cuenta: n° ${pagoData['cuenta'] ?? ''}
 ''';
 
       /// ==========================
