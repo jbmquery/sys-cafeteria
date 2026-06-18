@@ -115,7 +115,7 @@ class MontosResumenService {
       /// VUELTOS
       /// ========================
 
-      if (tipo == 'egreso' && categoria == 'vuelto') {
+      if (tipo == 'vuelto' && categoria == 'vuelto') {
         vueltos += monto;
 
         vueltosPorMetodo[metodo] = (vueltosPorMetodo[metodo] ?? 0) + monto;

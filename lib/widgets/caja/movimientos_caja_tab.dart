@@ -433,9 +433,11 @@ class _MovimientosCajaTabState extends State<MovimientosCajaTab> {
                           final monto =
                               (data['monto'] as num?)?.toDouble() ?? 0;
 
-                          final colorMovimiento = tipo == 'ingreso'
-                              ? Colors.greenAccent
-                              : Colors.redAccent;
+                          final Color colorMovimiento = switch (tipo) {
+                            'ingreso' => Colors.greenAccent,
+                            'vuelto' => Colors.amber,
+                            _ => Colors.redAccent,
+                          };
 
                           final horaActual = formatearFecha(data['fecha_pago']);
 

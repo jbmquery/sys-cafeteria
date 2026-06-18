@@ -227,7 +227,7 @@ class _ResumenGeneralTabState extends State<ResumenGeneralTab> {
           return const Center(
             child: Text(
               'No hay caja activa',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: TextStyle(color: Colors.white54, fontSize: 14),
             ),
           );
         }
@@ -282,7 +282,7 @@ class _ResumenGeneralTabState extends State<ResumenGeneralTab> {
                   ),
 
                   _miniCard(
-                    title: "Ingresos",
+                    title: "Ingresos Caja",
                     value: mostrarMontos
                         ? "S/ ${ingresos.toStringAsFixed(2)}"
                         : "••••",
@@ -291,7 +291,7 @@ class _ResumenGeneralTabState extends State<ResumenGeneralTab> {
                   ),
 
                   _miniCard(
-                    title: "Egresos",
+                    title: "Egresos Caja",
                     value: mostrarMontos
                         ? "S/ ${egresos.toStringAsFixed(2)}"
                         : "••••",

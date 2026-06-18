@@ -127,7 +127,7 @@ cuenta: n° ${pagoData['cuenta'] ?? ''}
           'fecha_pedido': pedidoData['fecha'],
           'fecha_pago': pagoData['hora_pago'],
 
-          'tipo': 'egreso',
+          'tipo': 'vuelto',
           'categoria': 'vuelto',
 
           'descripcion': descripcion,
