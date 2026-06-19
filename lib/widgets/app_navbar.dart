@@ -4,6 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 import '../pages/login_page.dart';
+import '../pages/marcar_asistencia_page.dart';
+import '../pages/notificaciones_usuario_page.dart';
+import '../pages/ver_informacion_usuario_page.dart';
 
 class AppNavbar extends StatelessWidget {
   const AppNavbar({super.key});
@@ -90,6 +93,39 @@ class AppNavbar extends StatelessWidget {
                 ],
 
                 onSelected: (value) async {
+                  if (value == "Ver información") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const VerInformacionUsuarioPage(),
+                      ),
+                    );
+
+                    return;
+                  }
+
+                  if (value == "Marcar asistencia") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const MarcarAsistenciaPage(),
+                      ),
+                    );
+
+                    return;
+                  }
+
+                  if (value == "Notificaciones") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const NotificacionesUsuarioPage(),
+                      ),
+                    );
+
+                    return;
+                  }
+
                   if (value == "Cerrar Sesión") {
                     await authService.logout();
 
