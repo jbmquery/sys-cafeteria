@@ -25,7 +25,7 @@ class AppBottomTabBar extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.all(14),
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(24),

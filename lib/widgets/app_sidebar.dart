@@ -9,6 +9,7 @@ import '../pages/edit_carta_page.dart';
 import '../services/navigation_service.dart';
 import '../pages/impresora_page.dart';
 import '../pages/caja_page.dart';
+import '../pages/asistencia_page.dart';
 
 class AppSidebar extends StatelessWidget {
   const AppSidebar({super.key});
@@ -168,6 +169,7 @@ class AppSidebar extends StatelessWidget {
                   menuItem(Icons.local_shipping_outlined, "Proveedores"),
                 if (visible("Clientes"))
                   menuItem(Icons.people_outline, "Clientes"),
+
                 if (visible("Caja"))
                   menuItem(
                     Icons.point_of_sale,
@@ -190,8 +192,19 @@ class AppSidebar extends StatelessWidget {
                   menuItem(Icons.notifications_none, "Notificaciones"),
                 if (visible("Bonos y Descuentos"))
                   menuItem(Icons.attach_money_outlined, "Bonos y Descuentos"),
+
                 if (visible("Asistencias"))
-                  menuItem(Icons.assignment_turned_in_outlined, "Asistencias"),
+                  menuItem(
+                    Icons.assignment_turned_in_outlined,
+                    "Asistencias",
+                    onTap: () {
+                      NavigationService.slideTo(
+                        context,
+                        const AsistenciaPage(),
+                      );
+                    },
+                  ),
+
                 if (visible("Sedes y Turnos"))
                   menuItem(
                     Icons.query_builder,
